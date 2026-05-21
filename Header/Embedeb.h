@@ -38,17 +38,18 @@ class Event;
 struct EmbedDebMessage {
     const char* type;
     const char* content;
+    #define TypeContentSeparator "="
 
     EmbedDebMessage(const char* type, const char* content) : type(type), content(content) {}
 
     UnsignedInt inline Length() const {
-        return strlen(type) + strlen(content) + strlen(MessageSeparator) + 1; // +1 for the "=" separator
+        return strlen(type) + strlen(content) + strlen(MessageSeparator) + strlen(TypeContentSeparator);
     }
     const char* Build() const {
-        char* message = new char[strlen(type) + strlen(content) + 2]; // +2 for ":" separator and null terminator
+        char* message = new char[strlen(type) + strlen(content) + strlen(TypeContentSeparator) + strlen(MessageSeparator) + 1]; // +1 for null terminator
 
         strcpy(message, type);
-        strcat(message, ":");
+        strcat(message, TypeContentSeparator);  
         strcat(message, content);
         strcat(message, MessageSeparator);
 
