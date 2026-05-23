@@ -68,7 +68,7 @@ struct EmbedDebMessage {
 };
 
 using WriteFunction = void(*)(const char*);
-using TimeFunction = int(*)();
+using TimeFunction = TimeType(*)();
 
 class EmbedDeb {
 public:
@@ -187,33 +187,22 @@ private:
 #pragma endregion 
 
 
-#pragma region Events
+#pragma region Messages
 
-class Event {
+class TextMessage {
 public:
-    Event(const char* type) : eventType(type) {}
+    char* text;
+    TextMessage(char* text) : text(text) {}
+    TextMessage(const char* text) {
+        this->text = new char[strlen(text) + 1];
+        strcpy(this->text, text);
+	}
 
-    virtual const void flag() = 0;
-
-    const char* getType() const {
-        return eventType;
+    void push() {
+        EmbedDebMessage message("Txt", text);
+		EmbedDeb::Log(message);
     }
-
-
-protected:
-    bool inline Log(const char* content) {
-        EmbedDebMessage message(getType(), content);
-        return EmbedDeb::LogMessage(message);
-    }
-
-    void inline SetType(const char* type) {
-        eventType = type;
-    }
-
-private:
-    const char* eventType;
 };
-
 
 #pragma endregion
 
