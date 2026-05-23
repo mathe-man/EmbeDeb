@@ -16,8 +16,11 @@ public class StringMessage : Message
 
 public class StringMessageHandler
 {
-    [MessageHandler("String")]
+    [MessageHandler("String", "Str", "Text", "Txt", "Print")]
 
     public static Message Handle(RawMessage me)
-        => new StringMessage(me.Content);
+    {
+        Console.WriteLine($"StringMessageHandler: {me.Content}");
+        return new StringMessage(me.Content);
+    }
 }
