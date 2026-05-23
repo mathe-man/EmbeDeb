@@ -21,24 +21,34 @@
 #include <cstdint>
 #include <cstring>
 
+#pragma region Defines
 
-#define BoardName "Board"
-
-#define MessageSeparator "|"
-#define MessagesBufferSize 512
 
 #define EmbedDeb_MagicNumber "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
+#define BoardName "UndefinedName"       // Name of the board
 
 
-typedef uint16_t UnsignedInt; // This type can be changed depending of the needs
-typedef uint32_t TimeType; // This type can be changed depending of the needs
+#define MessageSeparator "|"            // Separator between messages
+#define TypeContentSeparator "="        // Key-Value separator between the type and the content of a message
+
+
+#define MessagesBufferSize 512          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
+
+
+ // Those types can be changed depending of the needs
+typedef uint16_t UnsignedInt;           // Type for unsigned integers, used for sizes and counts
+typedef uint32_t TimeType;              // Type for time values, used for timestamps and durations
+
+#pragma endregion
+
+
+#pragma region Core
 
 class Event;
 
 struct EmbedDebMessage {
     const char* type;
     const char* content;
-    #define TypeContentSeparator "="
 
     EmbedDebMessage(const char* type, const char* content) : type(type), content(content) {}
 
@@ -66,7 +76,7 @@ public:
     static void Init(WriteFunction writeFunc, TimeFunction timeFunc) {
         setWriteFunction(writeFunc);
         setTimeFunction(timeFunc);
-	}
+    }
 
     static void setWriteFunction(WriteFunction func) {
         writeFunction = func;
@@ -87,27 +97,27 @@ public:
 
     static inline bool print(const char* value) {
         if (!writeFunction)
-			return false; // No write function set, cannot print
+            return false; // No write function set, cannot print
         
         writeFunction(value);
-		return true;
+        return true;
     }
 
     static inline bool println(const char* value) {
         if (!writeFunction)
-			return false; // No write function set, cannot print
+            return false; // No write function set, cannot print
         
         writeFunction(value);
         writeFunction("\r\n");  // Finish the line with a newline and carriage return
 
-		return true;
+        return true;
     }
 
     static inline TimeType GetTime() {
-		if (!timeFunction)
+        if (!timeFunction)
             return 0; // No time function set, cannot get time
         
-		return timeFunction();
+        return timeFunction();
     }
 
 
@@ -115,7 +125,7 @@ private:
 
     // Function pointer for writing messages, use Serial.print by default
     static inline WriteFunction writeFunction;
-	static inline TimeFunction timeFunction;
+    static inline TimeFunction timeFunction;
 
     static inline char eventsMessagesBuffer[MessagesBufferSize] = ""; // Buffer to hold the messages before flushing
 
@@ -174,7 +184,10 @@ private:
     }
 };
 
+#pragma endregion 
 
+
+#pragma region Events
 
 class Event {
 public:
@@ -193,7 +206,7 @@ protected:
         return EmbedDeb::LogMessage(message);
     }
 
-	void inline SetType(const char* type) {
+    void inline SetType(const char* type) {
         eventType = type;
     }
 
@@ -201,14 +214,6 @@ private:
     const char* eventType;
 };
 
-class TickEvent : public Event {
-public:
-    TickEvent(const char* name) : Event("TickEvent"), name(name) {}
 
-    const void flag() override {
-        Log(name);
-    }
+#pragma endregion
 
-protected:
-	const char* name = "Tick";
-};
