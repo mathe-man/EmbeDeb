@@ -16,6 +16,19 @@ public class MessageDispatcher
             RegisterHandlers(Assembly.GetExecutingAssembly());
         }
     }
+    public MessageDispatcher(bool registerCurrentAssembly, params ICommunicationProvider[] providers)
+    {
+        if (registerCurrentAssembly)
+            // Register handlers from the current 
+            RegisterHandlers(Assembly.GetExecutingAssembly());
+        
+
+        // Subscribe to the provided communication providers
+        foreach (var provider in providers)
+            SubscribeToProvider(provider);
+    }
+    
+
     public void RegisterHandlers(Assembly assembly)
     {
         var assemblyHandlers = assembly.GetTypes()
