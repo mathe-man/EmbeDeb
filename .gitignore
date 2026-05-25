@@ -20,3 +20,5 @@
 # Ignore any folder with the name ending with "-ignore" at any level in the directory structure.
 # Allowing anybody to create ignored folders
 **/*-ignore/
+# Also Ignore files with the name ending with "-ignore" at any level in the directory structure.
+**/*-ignore.*
