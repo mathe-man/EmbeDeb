@@ -1,4 +1,5 @@
 ﻿using EmbeDebInterpreter.Communication;
+using EmbeDebInterpreter.Communication.CommunicationProvider;
 using System.Reflection;
 
 namespace EmbeDebInterpreter.Message;
@@ -49,4 +50,10 @@ public class MessageDispatcher
     }
     public int Dispatch(RawMessage rawMessage)
         => _handlers.CallHandlers(rawMessage);
+
+    public void SubscribeToProvider(ICommunicationProvider provider)
+    {
+        provider.OnCommunicationReceived += (_, message) =>
+        { Dispatch(new RawMessage(message)); };
+    }
 }
