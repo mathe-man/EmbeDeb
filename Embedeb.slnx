@@ -6,6 +6,7 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="Docs/Protocol.md" />
     <File Path="LICENSE" />
   </Folder>
   <Project Path="DebugConsoleApp/DebugConsoleApp.csproj" Id="d85bacf5-c8f4-48b6-8eb3-f65d414152d2" />
