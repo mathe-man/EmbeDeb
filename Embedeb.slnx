@@ -8,6 +8,7 @@
     <File Path=".gitignore" />
     <File Path="Docs/Protocol.md" />
     <File Path="LICENSE" />
+    <File Path="README.md" />
   </Folder>
   <Project Path="DebugConsoleApp/DebugConsoleApp.csproj" Id="d85bacf5-c8f4-48b6-8eb3-f65d414152d2" />
   <Project Path="EmbeDebInterpreter/EmbeDebInterpreter.csproj" />
