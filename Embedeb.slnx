@@ -4,15 +4,21 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+
   <Folder Name="/Solution Items/">
+
+    <File Path="README.md" />
+    <File Path="LICENSE" />
     <File Path=".gitignore" />
     <File Path="Docs/Protocol.md" />
-    <File Path="LICENSE" />
-    <File Path="README.md" />
+    
   </Folder>
+
   <Project Path="DebugConsoleApp/DebugConsoleApp.csproj" Id="d85bacf5-c8f4-48b6-8eb3-f65d414152d2" />
   <Project Path="EmbeDebInterpreter/EmbeDebInterpreter.csproj" />
+
   <Project Path="Header/Header.vcxproj" Id="4710cb7e-2ac6-4a78-a8c6-62554b6e3380">
     <Build Project="false" />
+    <!-- We don't wanna compile the header -->
   </Project>
 </Solution>
