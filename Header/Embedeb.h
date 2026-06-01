@@ -36,7 +36,7 @@
 
 
  // Those types can be changed depending of the needs
-typedef uint16_t UnsignedInt;           // Type for unsigned integers, used for sizes and counts
+typedef uint32_t UnsignedInt;           // Type for unsigned integers, used for sizes and counts
 typedef uint32_t TimeType;              // Type for time values, used for timestamps and durations
 
 #pragma endregion
