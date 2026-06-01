@@ -17,9 +17,11 @@
  */
 
 
+
 #pragma once
 #include <cstdint>
 #include <cstring>
+#include <string>
 
 #pragma region Defines
 
@@ -204,5 +206,45 @@ public:
     }
 };
 
+
+class HeapMessage {
+public:
+
+    // Function to get the free heap, should be implemented by the user depending on the platform
+    // (e.g., using ESP.getFreeHeap() for ESP32)
+    typedef UnsignedInt(*HeapCallback)();
+
+	// Set the callback function to get the free heap
+    static void SetCallback(HeapCallback callback) {
+        m_callback = callback;
+	}
+	// Set the total heap size
+    static void SetTotalHeap(UnsignedInt totalHeap) {
+        m_totalHeap = totalHeap;
+
+		EmbedDebMessage message("TotalHeap", std::to_string(totalHeap).c_str());
+		EmbedDeb::Log(message);
+    }
+
+	// Setup the callback function and the total heap size
+	static void Setup(HeapCallback callback, UnsignedInt totalHeap) {
+        SetCallback(callback);
+        SetTotalHeap(totalHeap);
+    }
+
+    static void push() {
+        if (!m_callback)
+            return; // No callback set, cannot push heap message
+		
+		EmbedDebMessage message("Heap", std::to_string(m_callback()).c_str());
+		EmbedDeb::Log(message);
+    }
+
+private:
+	inline static HeapCallback m_callback = nullptr;
+    inline static UnsignedInt m_totalHeap = 0;
+    
+};
+ 
 #pragma endregion
 
