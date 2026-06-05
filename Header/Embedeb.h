@@ -25,6 +25,7 @@
 
 
 #define EmbedDeb_MagicNumber "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
+#define EmbedDeb_Version "1.0"             // Version of the EmbedDeb protocol, can be used for compatibility checks
 #define BoardName "UndefinedName"       // Name of the board
 
 
@@ -76,6 +77,9 @@ public:
     static void Init(WriteFunction writeFunc, TimeFunction timeFunc) {
         setWriteFunction(writeFunc);
         setTimeFunction(timeFunc);
+
+		// Log the initialization message
+		BoardDebugInitMessage::push();
     }
 
     static void setWriteFunction(WriteFunction func) {
@@ -188,6 +192,24 @@ private:
 
 
 #pragma region Messages
+
+class BoardDebugInitMessage {
+public:
+
+	static void push() {
+        char content [sizeof(BoardName) + sizeof(EmbedDeb_Version) + 2] = "\0";
+
+        // Build the message
+		// BoardName,EmbedDeb_Version
+		strcpy(content, BoardName);
+        strcat(content, ",");
+		strcat(content, EmbedDeb_Version);
+
+		EmbedDebMessage message("BDBInit", content);
+		EmbedDeb::Log(message);
+	}
+};
+
 
 class TextMessage {
 public:
