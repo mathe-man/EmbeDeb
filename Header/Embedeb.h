@@ -21,8 +21,6 @@
 #pragma once
 #include <cstdint>
 #include <cstring>
-#include <string>
-
 #pragma region Defines
 
 
@@ -222,7 +220,7 @@ public:
     static void SetTotalHeap(UnsignedInt totalHeap) {
         m_totalHeap = totalHeap;
 
-		EmbedDebMessage message("TotalHeap", std::to_string(totalHeap).c_str());
+		EmbedDebMessage message("TotalHeap", (char[])m_totalHeap);
 		EmbedDeb::Log(message);
     }
 
@@ -236,7 +234,7 @@ public:
         if (!m_callback)
             return; // No callback set, cannot push heap message
 		
-		EmbedDebMessage message("Heap", std::to_string(m_callback()).c_str());
+		EmbedDebMessage message("Heap", (char[])m_callback());
 		EmbedDeb::Log(message);
     }
 
