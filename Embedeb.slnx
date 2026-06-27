@@ -13,16 +13,16 @@
     <File Path="Docs/Protocol.md" />
     
   </Folder>
-
   <Project Path="DebugConsoleApp/DebugConsoleApp.csproj" Id="d85bacf5-c8f4-48b6-8eb3-f65d414152d2" />
+  <Project Path="Desktop/Desktop.csproj" Id="40d0ea96-bd94-4175-8d2d-664b8ff63f0e">
+    <Platform Solution="*|Any CPU" Project="x64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
   <Project Path="EmbeDebInterpreter/EmbeDebInterpreter.csproj" />
-
-  <!-- Example projects -->
   <Project Path="Examples/DebuggingProvider/ExampleDebuggingProvider.csproj" Id="6d493422-93f3-4fb7-af7b-e714f0e5684a" />
-  
-  <!-- Single Header C++ library -->
   <Project Path="Header/Header.vcxproj" Id="4710cb7e-2ac6-4a78-a8c6-62554b6e3380">
-    <!-- We don't wanna compile the header -->
     <Build Project="false" />
   </Project>
 </Solution>
