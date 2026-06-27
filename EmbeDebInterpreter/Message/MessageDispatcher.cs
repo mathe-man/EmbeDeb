@@ -13,7 +13,7 @@ public class MessageDispatcher
         if (registerCurrentAssembly)
         {
             // Register handlers from the current assembly
-            RegisterHandlers(Assembly.GetExecutingAssembly());
+            RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
         }
     }
 
@@ -27,7 +27,7 @@ public class MessageDispatcher
     {
         if (registerCurrentAssembly)
             // Register handlers from the current 
-            RegisterHandlers(Assembly.GetExecutingAssembly());
+            RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
         
 
         // Subscribe to the provided communication providers
@@ -36,7 +36,7 @@ public class MessageDispatcher
     }
     
 
-    public void RegisterHandlers(Assembly assembly)
+    public void RegisterAssemblyHandlers(Assembly assembly)
     {
         var assemblyHandlers = assembly.GetTypes()
             .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static))
@@ -55,6 +55,15 @@ public class MessageDispatcher
             foreach (var messageId in handler.Key)  // For each message ID defined in the attribute of the handler  
                 _handlers.AddHandler(messageId, handler.Value); // We add the handler for that message ID in the register
     }
+
+    public void RegisterHandlers(params (string messageType, MethodInfo handler)[] handlersPairs)
+    {
+        foreach (var pair in handlersPairs)
+            _handlers.AddHandler(pair.messageType, pair.handler);
+    }
+
+    public void RegisterHandler(string messageType, MethodInfo handler)
+        => _handlers.AddHandler(messageType, handler);
 
 
     public int Dispatch(ParsedCommunication communication)
