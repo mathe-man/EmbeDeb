@@ -6,7 +6,7 @@ public class DebuggingCommunicationProvider : ICommunicationProvider
     public event EventHandler<string>? OnCommunicationReceived;
 
     public int defaultLatency;
-    public DebuggingCommunicationProvider(int defaultLatencyMs = 300)
+    public DebuggingCommunicationProvider(int defaultLatencyMs = 0)
         => defaultLatency = defaultLatencyMs;
 
     public void SendCommunication(string message, int latencyMs = -1)
