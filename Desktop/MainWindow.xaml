@@ -7,10 +7,15 @@
         mc:Ignorable="d"
         
         xmlns:local="clr-namespace:Desktop"
-        
-        Title="MainWindow" Height="450" Width="800">
-    
-    <Grid>
+        xmlns:dock="https://github.com/Dirkster99/AvalonDock"
 
-    </Grid>
+        Title="MainWindow" Height="500" Width="800">
+
+    <dock:DockingManager x:Name="DockingManager">
+        <dock:LayoutRoot>
+
+
+            
+        </dock:LayoutRoot>
+    </dock:DockingManager>
 </Window>
