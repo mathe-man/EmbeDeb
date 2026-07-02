@@ -9,7 +9,13 @@
              xmlns:local="clr-namespace:Desktop.Views"
              
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    
+    <StackPanel>
+        <Button Content="Refresh" 
+                Command="{Binding RefreshSeriesCommand}"/>
+        <Button Content="Add" 
+                Command="{Binding AddMessageCommand}"/>
+        
         <TextBlock Text="{Binding SerieValues}"/>
-    </Grid>
+    </StackPanel>
 </UserControl>

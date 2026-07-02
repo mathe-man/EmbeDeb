@@ -21,21 +21,28 @@ public partial class TimeSerieViewModel : ObservableObject
         RefreshSeries();
     }
 
+
     [RelayCommand]
-    public void RefreshSeries()
+    private void AddMessage()
+    {
+        TimeSerieValueMessage.Handle(new EmbeDebInterpreter.Message.RawMessage("TimeSerieValue", "Serie1,05,-7.1"));
+        RefreshSeries();
+    }
+
+    [RelayCommand]
+    private void RefreshSeries()
     {
         AvaibleSeries.Clear();
         foreach (var serie in TimeSerieValueMessage.GetSeriesNames())
             AvaibleSeries.Add(serie);
 
-        if (_serieName == string.Empty)
+        if (SerieName == string.Empty)
             if (AvaibleSeries.Count > 0)
-                _serieName = AvaibleSeries[0];
-
+                SerieName = AvaibleSeries[0];
 
         _serieValues = string.Empty;
-        foreach (var value in TimeSerieValueMessage.GetSerie(_serieName))
-            _serieValues += $"TimePoint: {value.TimePoint}, Value: {value.Value}\n";
+        foreach (var value in TimeSerieValueMessage.GetSerie(SerieName))
+            SerieValues += $"TimePoint: {value.TimePoint}, Value: {value.Value}\n";
     }
 
 }
