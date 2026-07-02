@@ -14,10 +14,6 @@ public partial class TimeSerieViewModel : ObservableObject
 
     public TimeSerieViewModel()
     {
-        TimeSerieValueMessage.Handle(new EmbeDebInterpreter.Message.RawMessage("TimeSerieValue", "Serie1,0,1.0"));
-        TimeSerieValueMessage.Handle(new EmbeDebInterpreter.Message.RawMessage("TimeSerieValue", "Serie1,3,4.3"));
-        TimeSerieValueMessage.Handle(new EmbeDebInterpreter.Message.RawMessage("TimeSerieValue", "Serie1,05,-7.1"));
-
         RefreshSeries();
     }
 
