@@ -6,6 +6,8 @@ public abstract class Message
     protected void RaiseObjectCreated()
         => ObjectCreated?.Invoke(this, EventArgs.Empty);
 
+
+    // TODO make this static to be able to subscribe to the event without creating an instance of the class
     public event EventHandler ObjectCreated;
 }
 

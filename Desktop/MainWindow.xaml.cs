@@ -22,7 +22,7 @@ public partial class MainWindow : Window
         DebuggingCommunicationProvider provider = new();
 
         // Dispatcher
-        MessageDispatcher dispatcher = new (provider);
+        MessageDispatcher dispatcher = new (false, provider);
 
         // Register all message handlers in the current assembly
         dispatcher.RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
