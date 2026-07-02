@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         
         xmlns:local="clr-namespace:Desktop"
+        xmlns:views="clr-namespace:Desktop.Views"
         xmlns:dock="https://github.com/Dirkster99/AvalonDock"
 
         Title="MainWindow" Height="500" Width="800">
@@ -14,7 +15,17 @@
     <dock:DockingManager x:Name="DockingManager">
         <dock:LayoutRoot>
 
+            <dock:LayoutPanel Orientation="Horizontal">
 
+                <dock:LayoutDocumentPane>
+
+                    <LayoutDocument>
+                        <views:TimeSerieView/>
+                    </LayoutDocument>
+                    
+                </dock:LayoutDocumentPane>
+                
+            </dock:LayoutPanel>
             
         </dock:LayoutRoot>
     </dock:DockingManager>
