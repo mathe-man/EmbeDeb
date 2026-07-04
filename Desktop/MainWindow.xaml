@@ -27,6 +27,12 @@
                         <views:EventView/>
                     </LayoutDocument>
                 </dock:LayoutDocumentPane>
+
+                <dock:LayoutDocumentPane>
+                    <LayoutDocument Title="Serial Communication">
+                        <views:SerialCommunicationView/>
+                    </LayoutDocument>
+                </dock:LayoutDocumentPane>
                 
             </dock:LayoutPanel>
             
