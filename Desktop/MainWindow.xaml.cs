@@ -28,5 +28,6 @@ public partial class MainWindow : Window
         dispatcher.RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
 
         provider.SendCommunication("XX|Ard|TimeSerieValue=Serie1,65,-7.1");
+        provider.SendCommunication("XX|Ard|e=Somethinghappened,34");
     }
 }

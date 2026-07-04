@@ -36,7 +36,7 @@ public partial class TimeSerieViewModel : ObservableObject
             if (AvaibleSeries.Count > 0)
                 SerieName = AvaibleSeries[0];
 
-        _serieValues = string.Empty;
+        SerieValues = string.Empty;
         foreach (var value in TimeSerieValueMessage.GetSerie(SerieName))
             SerieValues += $"TimePoint: {value.TimePoint}, Value: {value.Value}\n";
     }

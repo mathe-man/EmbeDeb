@@ -19,10 +19,13 @@
 
                 <dock:LayoutDocumentPane>
 
-                    <LayoutDocument>
+                    <LayoutDocument Title="Time Serie">
                         <views:TimeSerieView/>
                     </LayoutDocument>
-                    
+
+                    <LayoutDocument Title="Events">
+                        <views:EventView/>
+                    </LayoutDocument>
                 </dock:LayoutDocumentPane>
                 
             </dock:LayoutPanel>
