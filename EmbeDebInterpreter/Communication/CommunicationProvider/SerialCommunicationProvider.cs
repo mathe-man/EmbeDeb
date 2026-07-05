@@ -4,7 +4,7 @@ namespace EmbeDebInterpreter.Communication.CommunicationProvider;
 
 public class SerialCommunicationProvider : ICommunicationProvider
 {
-    public event EventHandler<string>? OnCommunicationReceived;
+    public event EventHandler<ParsedCommunication>? OnCommunicationReceived;
     
 
     private SerialPort _serialPort;
@@ -49,7 +49,7 @@ public class SerialCommunicationProvider : ICommunicationProvider
 
 
             foreach (var message in messages) {
-                OnCommunicationReceived?.Invoke(this, message); // Raise event for each complete message
+                OnCommunicationReceived?.Invoke(this, new ParsedCommunication(message)); // Raise event for each complete message
             }
         }
     }

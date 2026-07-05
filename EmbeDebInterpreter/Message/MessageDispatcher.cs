@@ -82,7 +82,9 @@ public class MessageDispatcher
 
     public void SubscribeToProvider(ICommunicationProvider provider)
     {
-        provider.OnCommunicationReceived += (_, message) =>
-        { Dispatch(new RawMessage(message)); };
+        provider.OnCommunicationReceived += (_, communication) =>
+        {
+            Dispatch(communication);        
+        };
     }
 }

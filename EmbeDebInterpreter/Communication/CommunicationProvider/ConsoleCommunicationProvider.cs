@@ -2,14 +2,14 @@
 
 public class ConsoleCommunicationProvider : ICommunicationProvider
 {
-    public event EventHandler<string>? OnCommunicationReceived;
+    public event EventHandler<ParsedCommunication>? OnCommunicationReceived;
     
     public void ListenToConsoleInput()
     {
         while (true)
         {
             string input = Console.ReadLine() ?? string.Empty;
-            OnCommunicationReceived?.Invoke(this, input);
+            OnCommunicationReceived?.Invoke(this, new ParsedCommunication(input));
         }
     }
 }

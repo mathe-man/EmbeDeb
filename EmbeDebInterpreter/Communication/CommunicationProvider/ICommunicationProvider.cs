@@ -2,5 +2,5 @@
 
 public interface ICommunicationProvider
 {
-    public event EventHandler<string>? OnCommunicationReceived;
+    public event EventHandler<ParsedCommunication>? OnCommunicationReceived;
 }
