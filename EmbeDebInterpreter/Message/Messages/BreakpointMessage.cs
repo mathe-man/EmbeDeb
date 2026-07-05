@@ -9,9 +9,8 @@ public class BreakPointMessage : Message
         ReceivedTime = receivedTime;
         RaiseObjectCreated();
     }
-}
 
-public class BreakpointMessageHandler {
+
     [MessageHandler("Breakpoint", "bp")]
     public static Message Handle(RawMessage me)
     {

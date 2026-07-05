@@ -12,10 +12,7 @@ public class StringMessage : Message
 
     public override string ToString()
         => Value;
-}
 
-public class StringMessageHandler
-{
     [MessageHandler("String", "str")]
     public static Message Handle(RawMessage me)
     {
