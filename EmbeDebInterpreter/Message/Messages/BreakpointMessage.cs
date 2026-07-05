@@ -12,7 +12,7 @@ public class BreakPointMessage : Message
 }
 
 public class BreakpointMessageHandler {
-    [MessageHandler("BKPoint")]
+    [MessageHandler("Breakpoint", "bp")]
     public static Message Handle(RawMessage me)
     {
         // You can add a breakpoint here for debugging purposes

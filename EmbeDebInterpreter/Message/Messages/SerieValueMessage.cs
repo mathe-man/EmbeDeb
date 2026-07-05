@@ -15,7 +15,7 @@ public class SerieValueMessage : Message
 }
 public class SerieValueMessageHandler
 {
-    [MessageHandler("SerieValue")]
+    [MessageHandler("SerieValue", "sv")]
     public static Message Handle(RawMessage me)
     {
         SerieValueMessage result 
