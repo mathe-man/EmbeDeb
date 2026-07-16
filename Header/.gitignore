@@ -1,3 +1,4 @@
 *
 !.gitignore
-!Embedeb.h
+!include
+!src

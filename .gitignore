@@ -9,6 +9,9 @@
 # Visual Studio Code
 .vscode/
 
+# Jetbrain IDEs
+.idea/
+
 # Platform IO (VS Code extension)
 .pio/
 
