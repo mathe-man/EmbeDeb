@@ -122,6 +122,10 @@ public:
         return true;
     }
 
+    void inline CopyTo(void *dest, const size_t size) const {
+        memcpy(dest, m_buffer, size);
+    }
+
 friend Buffer; // Allow access to private members of between multiple buffer (Useful to append a buffer in another)
 private:
 
@@ -168,22 +172,24 @@ private:
     Buffer* m_buffer;
 };
 
-using WriteFunction = void(*)(const char*);
+using WriteFunction = void(*)(const char*, size_t);
 using TimeFunction = TimeType(*)();
 
 class EmbedDeb {
 public:
 
-    static void Init(WriteFunction writeFunc, TimeFunction timeFunc) {
+    static void Init(const WriteFunction writeFunc, const TimeFunction timeFunc) {
         setWriteFunction(writeFunc);
         setTimeFunction(timeFunc);
+
+        m_buffer = new Buffer(MessagesBufferSize);
     }
 
-    static void setWriteFunction(WriteFunction func) {
+    static void setWriteFunction(const WriteFunction func) {
         writeFunction = func;
     }
     
-    static void setTimeFunction(TimeFunction func) {
+    static void setTimeFunction(const TimeFunction func) {
         timeFunction = func;
     }
 
@@ -191,27 +197,9 @@ public:
         return FlushBuffer();
     }
 
-    static inline bool Log(Message message)
+    static inline bool Log(const Message message)
     {
         return LogMessage(message);
-    }
-
-    static inline bool print(const char* value) {
-        if (!writeFunction)
-            return false; // No write function set, cannot print
-        
-        writeFunction(value);
-        return true;
-    }
-
-    static inline bool println(const char* value) {
-        if (!writeFunction)
-            return false; // No write function set, cannot print
-        
-        writeFunction(value);
-        writeFunction("\r\n");  // Finish the line with a newline and carriage return
-
-        return true;
     }
 
     static inline TimeType GetTime() {
@@ -224,88 +212,65 @@ public:
 
 private:
 
-    // Function pointer for writing messages, use Serial.print by default
+    // Function pointer to write messages/communications
     static inline WriteFunction writeFunction;
     static inline TimeFunction timeFunction;
 
-    static inline char eventsMessagesBuffer[MessagesBufferSize] = ""; // Buffer to hold the messages before flushing
-
-    static inline bool FitInBuffer(EmbedDebMessage message) {
-        return strlen(eventsMessagesBuffer) + message.Length() + 1 < MessagesBufferSize; // +1 for null terminator
-    }
-
-    static inline UnsignedInt EmptyBufferSpace() {
-        return MessagesBufferSize - 1; // -1 for null terminator
-    }
-
-    static inline void ClearBuffer() {
-        eventsMessagesBuffer[0] = '\0';
-    }
-
-    static inline void AddToBuffer(EmbedDebMessage message) {
-        strcat(eventsMessagesBuffer, message.Build());   // The message build already include separator
-    }
+    static inline Buffer* m_buffer;
 
 
-    // Event class can have access to logging
-    friend class Event;
 
-#define MaxLogAttempt 5
-
-    static inline bool LogMessage(EmbedDebMessage message, uint8_t attempt = 0) {
-        if (attempt >= MaxLogAttempt) {
-            return false;       // Max log attempts reached, give up
+    static inline bool LogMessage(const Message message) {
+        // If it fit then we directly return true
+        if (message.CopyInto(*m_buffer)) {
+            return true;
         }
-        // Check if the message size is acceptable
-        if (message.Length() > EmptyBufferSpace())
-            return false;
+        // Otherwise we flush then try again
 
-        // Check if the message can fit in the buffer
-        if (!FitInBuffer(message)) {
-            FlushBuffer();
-            return LogMessage(message, attempt++); // Try to log the message again after flushing the buffer
-        }
+        FlushBuffer();
+        return message.CopyInto(*m_buffer);
 
-        // All the test passed => Add the message to the buffer and return true
-        AddToBuffer(message);
-        return true;
+    }
+
+    static inline void print(const char* write) {
+        writeFunction(write, strlen(write));
+    }
+
+    static inline void print(const Buffer& buffer) {
+        char *dest = new char[buffer.Length() + 1];
+
+        // Copy raw buffer bytes
+        buffer.CopyTo(dest, buffer.Length());
+
+        writeFunction(dest, buffer.Length());
     }
 
     static inline bool FlushBuffer()
     {
-        if (strlen(eventsMessagesBuffer) == 0) {
+        if (m_buffer->Length() == 0) {
             return false; // Buffer is empty, no need to flush
         }
         // Send the serial communication with the format: MagicNumber|BoardName|message1|message2|...|messageN (Assuming the separator is '|')
-        print(EmbedDeb_MagicNumber); print(MessageSeparator);
-        print(BoardName); print(MessageSeparator);
-        println(eventsMessagesBuffer);
-        ClearBuffer();
+
+        Buffer header(50);
+        header.Append(EmbedDeb_MagicNumber);
+        // Length of the communication
+        header.Append(
+            m_buffer->Length()  // Every messages
+            + strlen(EmbedDeb_MagicNumber)  // Magic number
+            + strlen(MessageSeparator)*2    // Two separator
+            + strlen(EMBEDDEB_BOARD_NAME)   // Board name
+            + sizeof(size_t)                    // The length counter (the one actually calculated)
+        );
+
+        header.Append(MessageSeparator);
+        header.Append(EMBEDDEB_BOARD_NAME);
+        header.Append(MessageSeparator);
+
+        print(header);
+        print(*m_buffer);
+        m_buffer->ClearBuffer();
         return true;
     }
 };
-
-#pragma endregion 
-
-
-#pragma region Messages
-
-
-class TextMessage {
-public:
-    char* text;
-    TextMessage(char* text) : text(text) {}
-    TextMessage(const char* text) {
-        this->text = new char[strlen(text) + 1];
-        strcpy(this->text, text);
-	}
-
-    void push() {
-        EmbedDebMessage message("Txt", text);
-		EmbedDeb::Log(message);
-    }
-};
-
-
-#pragma endregion
 
