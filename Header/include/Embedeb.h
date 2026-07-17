@@ -99,7 +99,19 @@ public:
         return true;
     }
 
+    bool inline Append(const Buffer& buffer)
+    {
+        if (!FitInBuffer(buffer.Length()))
+            return false;
 
+        memcpy(m_buffer + m_cursor, buffer.m_buffer, buffer.Length());
+
+        m_cursor += buffer.Length();
+
+        return true;
+    }
+
+friend Buffer; // Allow access to private members of between multiple buffer (Useful to append a buffer in another)
 private:
 
     size_t m_size;
