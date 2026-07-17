@@ -43,6 +43,7 @@ typedef uint32_t UnsignedInt;           // Type for unsigned integers, used for 
 typedef uint32_t TimeType;              // Type for time values, used for timestamps and durations
 
 #pragma endregion
+
 class Buffer {
 public:
     Buffer(uint32_t size) : m_size(size)
@@ -61,24 +62,34 @@ public:
     }
 
     template<typename T>
-    bool Append(T object)
+    bool Append(const T& object)
     {
         static_assert(std::is_trivially_copyable_v<T>,
             "Type must be trivially copyable");
+
 
         // First check available size
         if (!FitInBuffer(sizeof(object)))
             return false;
 
-        auto objBytes = ToBytes(&object);
+        memcpy(m_buffer + m_cursor, &object, sizeof(object));
 
-        // Loop over the bytes
-        for (int i = 0; i < sizeof(object); i++)
-            m_buffer[m_cursor++] = objBytes[i];
+        m_cursor += sizeof(object);
 
         return true;
     }
 
+    // char arrays overload
+    bool inline Append(const char* str) {
+        if (!FitInBuffer(strlen(str)))
+            return false;
+
+        memcpy(m_buffer + m_cursor, str, strlen(str));
+
+        m_cursor += strlen(str);
+
+        return true;
+    }
 
 
 private:
