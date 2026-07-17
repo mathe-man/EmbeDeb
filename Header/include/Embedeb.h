@@ -110,8 +110,7 @@ public:
         return true;
     }
 
-    bool inline Append(const Buffer& buffer)
-    {
+    bool inline Append(const Buffer &buffer) {
         if (!FitInBuffer(buffer.Length()))
             return false;
 
@@ -165,7 +164,7 @@ public:
     }
 
     bool CopyInto(Buffer& dest) const {
-        return dest.Append(m_buffer);
+        return dest.Append(*m_buffer);
     }
 
 private:
