@@ -127,29 +127,34 @@ private:
 
 
 
-#pragma region Core
+class Message {
+public:
+    Message(const char* type, const char* content)
+    {
+        // Size of the message:
+        // Type + Content + Type-Content separator and Messages separator
+        size_t size =
+            strlen(type) + strlen(content) + strlen(TypeContentSeparator) + strlen(MessageSeparator) ;
 
-class Event;
+        m_buffer = new Buffer(size);
 
-struct EmbedDebMessage {
-    const char* type;
-    const char* content;
-
-    EmbedDebMessage(const char* type, const char* content) : type(type), content(content) {}
-
-    UnsignedInt inline Length() const {
-        return strlen(type) + strlen(content) + strlen(MessageSeparator) + strlen(TypeContentSeparator);
+        m_buffer->Append(type);
+        m_buffer->Append(TypeContentSeparator);
+        m_buffer->Append(content);
+        m_buffer->Append(MessageSeparator);
     }
-    const char* Build() const {
-        char* message = new char[strlen(type) + strlen(content) + strlen(TypeContentSeparator) + strlen(MessageSeparator) + 1]; // +1 for null terminator
 
-        strcpy(message, type);
-        strcat(message, TypeContentSeparator);  
-        strcat(message, content);
-        strcat(message, MessageSeparator);
-
-        return message;
+    [[nodiscard]]
+    size_t inline Length() const {
+        return m_buffer->Length();
     }
+
+    bool CopyInto(Buffer& dest) const {
+        return dest.Append(m_buffer);
+    }
+
+private:
+    Buffer* m_buffer;
 };
 
 using WriteFunction = void(*)(const char*);
@@ -175,7 +180,7 @@ public:
         return FlushBuffer();
     }
 
-    static inline bool Log(EmbedDebMessage message)
+    static inline bool Log(Message message)
     {
         return LogMessage(message);
     }
