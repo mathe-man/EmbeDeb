@@ -46,7 +46,7 @@ typedef uint32_t TimeType;              // Type for time values, used for timest
 
 class Buffer {
 public:
-    Buffer(uint32_t size) : m_size(size)
+    Buffer(size_t size) : m_size(size)
     {
         m_buffer = new std::byte[size];
         m_cursor = 0;
@@ -59,6 +59,11 @@ public:
 
     void inline ClearBuffer() {
         m_cursor = 0;
+    }
+
+    [[nodiscard]]
+    size_t Length() const {
+        return m_cursor;
     }
 
     template<typename T>
@@ -94,10 +99,10 @@ public:
 
 private:
 
-    uint32_t m_size;
+    size_t m_size;
 
     std::byte *m_buffer;
-    uint16_t m_cursor;
+    size_t m_cursor;
 
     template<typename T>
     static const std::byte* ToBytes(const T& object){
