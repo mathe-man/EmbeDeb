@@ -28,7 +28,18 @@
 
 #define EmbedDeb_MagicNumber "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
 #define EmbedDeb_Version "1.0"             // Version of the EmbedDeb protocol, can be used for compatibility checks
-#define BoardName "UndefinedName"       // Name of the board
+
+// Choosing the board name to use
+#ifndef EMBEDDEB_BOARD_NAME
+#define EMBEDDEB_BOARD_NAME "UndefinedName"
+
+#if defined(__GNUC__) || defined(__clang__)
+#warning "EmbedDeb: EMBEDDEB_BOARD_NAME not defined. Using default value."
+#elif defined(_MSC_VER)
+#pragma message("WARNING: EmbedDeb: EMBEDDEB_BOARD_NAME not defined. Using default value.")
+#endif
+
+#endif
 
 
 #define MessageSeparator "|"            // Separator between messages
