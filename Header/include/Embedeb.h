@@ -51,6 +51,9 @@ public:
         m_buffer = new std::byte[size];
         m_cursor = 0;
     }
+    ~Buffer() {
+        delete m_buffer;
+    }
 
     [[nodiscard]]
     bool inline FitInBuffer(uint16_t size) const {
