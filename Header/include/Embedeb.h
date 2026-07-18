@@ -28,17 +28,17 @@
 #pragma region Expressions
 
 
-#define EMBEDEB_MAGIC "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
-#define EMBEDEB_VERSION "1.0"             // Version of the EmbedDeb protocol, can be used for compatibility checks
+#define EMBEDEB_MAGIC "\xEB\xDB" // Magic number to identify EmbeDeb messages: 0xEBDB
+#define EMBEDEB_VERSION "1.0"             // Version of the EmbeDeb protocol, can be used for compatibility checks
 
 // Choosing the board name to use
 #ifndef EMBEDEB_BOARD_NAME
 #define EMBEDEB_BOARD_NAME "UndefinedName"
 
 #if defined(__GNUC__) || defined(__clang__)
-#warning "EmbedDeb: EMBEDEB_BOARD_NAME not defined. Using default value."
+#warning "EmbeDeb: EMBEDEB_BOARD_NAME not defined. Using default value."
 #elif defined(_MSC_VER)
-#pragma message("WARNING: EmbeDeb: EMBEDDEB_BOARD_NAME not defined. Using default value.")
+#pragma message("WARNING: EmbeDeb: EMBEDEB_BOARD_NAME not defined. Using default value.")
 #endif
 
 #endif
@@ -201,7 +201,7 @@ private:
 };
 
 
-class EmbedDeb {
+class EmbeDeb {
 public:
 
     static void Init(const functions::WriteFunction writeFunc, const functions::TimeFunction timeFunc) {
