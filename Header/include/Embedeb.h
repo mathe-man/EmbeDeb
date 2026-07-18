@@ -23,41 +23,41 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#pragma region Defines
 
 
-#define EmbedDeb_MagicNumber "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
-#define EmbedDeb_Version "1.0"             // Version of the EmbedDeb protocol, can be used for compatibility checks
+#pragma region Expressions
+
+
+#define EMBEDEB_MAGIC "\xEB\xDB" // Magic number to identify EmbedDeb messages: 0xEBDB
+#define EMBEDEB_VERSION "1.0"             // Version of the EmbedDeb protocol, can be used for compatibility checks
 
 // Choosing the board name to use
-#ifndef EMBEDDEB_BOARD_NAME
-#define EMBEDDEB_BOARD_NAME "UndefinedName"
+#ifndef EMBEDEB_BOARD_NAME
+#define EMBEDEB_BOARD_NAME "UndefinedName"
 
 #if defined(__GNUC__) || defined(__clang__)
-#warning "EmbedDeb: EMBEDDEB_BOARD_NAME not defined. Using default value."
+#warning "EmbedDeb: EMBEDEB_BOARD_NAME not defined. Using default value."
 #elif defined(_MSC_VER)
-#pragma message("WARNING: EmbedDeb: EMBEDDEB_BOARD_NAME not defined. Using default value.")
+#pragma message("WARNING: EmbeDeb: EMBEDDEB_BOARD_NAME not defined. Using default value.")
 #endif
 
 #endif
 
 
-#define MessageSeparator "|"            // Separator between messages
-#define TypeContentSeparator "="        // Key-Value separator between the type and the content of a message
+constexpr char MessageSeparator =  *"|";           // Separator between messages
+constexpr char TypeContentSeparator = *"=";        // Key-Value separator between the type and the content of a message
+
+constexpr size_t MessagesBufferSize = 512;          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
 
 
-#define MessagesBufferSize 512          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
-
-
- // Those types can be changed depending of the needs
-typedef uint32_t UnsignedInt;           // Type for unsigned integers, used for sizes and counts
+ // Those types can be changed depending on the needs
 typedef uint32_t TimeType;              // Type for time values, used for timestamps and durations
 
 #pragma endregion
 
 class Buffer {
 public:
-    Buffer(size_t size) : m_size(size)
+    explicit Buffer(size_t size) : m_size(size)
     {
         m_buffer = new std::byte[size];
         m_cursor = 0;
@@ -67,11 +67,11 @@ public:
     }
 
     [[nodiscard]]
-    bool inline FitInBuffer(uint16_t size) const {
+    bool FitInBuffer(uint16_t size) const {
         return size <= m_size - m_cursor;
     }
 
-    void inline ClearBuffer() {
+    void ClearBuffer() {
         m_cursor = 0;
     }
 
@@ -99,7 +99,7 @@ public:
     }
 
     // char arrays overload
-    bool inline Append(const char* str) {
+    bool Append(const char* str) {
         if (!FitInBuffer(strlen(str)))
             return false;
 
@@ -110,7 +110,7 @@ public:
         return true;
     }
 
-    bool inline Append(const Buffer &buffer) {
+    bool Append(const Buffer &buffer) {
         if (!FitInBuffer(buffer.Length()))
             return false;
 
@@ -121,7 +121,7 @@ public:
         return true;
     }
 
-    void inline CopyTo(void *dest, const size_t size) const {
+    void CopyTo(void *dest, const size_t size) const {
         memcpy(dest, m_buffer, size);
     }
 
@@ -148,7 +148,7 @@ public:
         // Size of the message:
         // Type + Content + Type-Content separator and Messages separator
         size_t size =
-            strlen(type) + strlen(content) + strlen(TypeContentSeparator) + strlen(MessageSeparator) ;
+            strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator) ;
 
         m_buffer = new Buffer(size);
 
@@ -159,7 +159,7 @@ public:
     }
 
     [[nodiscard]]
-    size_t inline Length() const {
+    size_t Length() const {
         return m_buffer->Length();
     }
 
@@ -192,16 +192,16 @@ public:
         timeFunction = func;
     }
 
-    static inline bool Flush() {
+    static bool Flush() {
         return FlushBuffer();
     }
 
-    static inline bool Log(const Message message)
+    static bool Log(const Message message)
     {
         return LogMessage(message);
     }
 
-    static inline TimeType GetTime() {
+    static TimeType GetTime() {
         if (!timeFunction)
             return 0; // No time function set, cannot get time
         
@@ -219,7 +219,7 @@ private:
 
 
 
-    static inline bool LogMessage(const Message message) {
+    static bool LogMessage(const Message message) {
         // If it fit then we directly return true
         if (message.CopyInto(*m_buffer)) {
             return true;
@@ -231,11 +231,11 @@ private:
 
     }
 
-    static inline void print(const char* write) {
+    static void print(const char* write) {
         writeFunction(write, strlen(write));
     }
 
-    static inline void print(const Buffer& buffer) {
+    static void print(const Buffer& buffer) {
         char *dest = new char[buffer.Length() + 1];
 
         // Copy raw buffer bytes
@@ -244,7 +244,7 @@ private:
         writeFunction(dest, buffer.Length());
     }
 
-    static inline bool FlushBuffer()
+    static bool FlushBuffer()
     {
         if (m_buffer->Length() == 0) {
             return false; // Buffer is empty, no need to flush
@@ -252,18 +252,18 @@ private:
         // Send the serial communication with the format: MagicNumber|BoardName|message1|message2|...|messageN (Assuming the separator is '|')
 
         Buffer header(50);
-        header.Append(EmbedDeb_MagicNumber);
+        header.Append(EMBEDEB_MAGIC);
         // Length of the communication
         header.Append(
             m_buffer->Length()  // Every messages
-            + strlen(EmbedDeb_MagicNumber)  // Magic number
-            + strlen(MessageSeparator)*2    // Two separator
-            + strlen(EMBEDDEB_BOARD_NAME)   // Board name
+            + strlen(EMBEDEB_MAGIC)  // Magic number
+            + sizeof(MessageSeparator)*2    // Two separator
+            + strlen(EMBEDEB_BOARD_NAME)   // Board name
             + sizeof(size_t)                    // The length counter (the one actually calculated)
         );
 
         header.Append(MessageSeparator);
-        header.Append(EMBEDDEB_BOARD_NAME);
+        header.Append(EMBEDEB_BOARD_NAME);
         header.Append(MessageSeparator);
 
         print(header);
