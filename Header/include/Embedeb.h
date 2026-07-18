@@ -47,13 +47,36 @@
 constexpr char MessageSeparator =  *"|";           // Separator between messages
 constexpr char TypeContentSeparator = *"=";        // Key-Value separator between the type and the content of a message
 
-constexpr size_t MessagesBufferSize = 512;          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
+constexpr size_t MessagesBufferSize = 128;          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
 
 
  // Those types can be changed depending on the needs
 typedef uint32_t TimeType;              // Type for time values, used for timestamps and durations
 
 #pragma endregion
+
+namespace functions {
+    using WriteFunction = void(*)(const char*, size_t);
+    using TimeFunction = TimeType(*)();
+
+    inline WriteFunction writeFunction = nullptr;
+    inline TimeFunction timeFunction = nullptr;
+
+    inline TimeType GetTime()
+    {
+        if (!timeFunction)
+            return 0;
+
+        return timeFunction();
+    }
+
+    inline void Write(const char* str, size_t len) {
+        if (!writeFunction)
+            return;
+
+        writeFunction(str, len);
+    }
+}
 
 class Buffer {
 public:
@@ -140,7 +163,6 @@ private:
 };
 
 
-
 class Message {
 public:
     Message(const char* type, const char* content)
@@ -148,11 +170,18 @@ public:
         // Size of the message:
         // Type + Content + Type-Content separator and Messages separator
         size_t size =
-            strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator) ;
+            strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
+        + sizeof(TimeType) + sizeof(','); // We may also add informations about the timestamp
 
         m_buffer = new Buffer(size);
 
         m_buffer->Append(type);
+
+        if (const auto time = functions::GetTime(); time != 0) {
+            m_buffer->Append(',');
+            m_buffer->Append(time);
+        }
+
         m_buffer->Append(TypeContentSeparator);
         m_buffer->Append(content);
         m_buffer->Append(MessageSeparator);
@@ -171,25 +200,23 @@ private:
     Buffer* m_buffer;
 };
 
-using WriteFunction = void(*)(const char*, size_t);
-using TimeFunction = TimeType(*)();
 
 class EmbedDeb {
 public:
 
-    static void Init(const WriteFunction writeFunc, const TimeFunction timeFunc) {
+    static void Init(const functions::WriteFunction writeFunc, const functions::TimeFunction timeFunc) {
         setWriteFunction(writeFunc);
         setTimeFunction(timeFunc);
 
         m_buffer = new Buffer(MessagesBufferSize);
     }
 
-    static void setWriteFunction(const WriteFunction func) {
-        writeFunction = func;
+    static void setWriteFunction(const functions::WriteFunction func) {
+        functions::writeFunction = func;
     }
     
-    static void setTimeFunction(const TimeFunction func) {
-        timeFunction = func;
+    static void setTimeFunction(const functions::TimeFunction func) {
+        functions::timeFunction = func;
     }
 
     static bool Flush() {
@@ -201,22 +228,9 @@ public:
         return LogMessage(message);
     }
 
-    static TimeType GetTime() {
-        if (!timeFunction)
-            return 0; // No time function set, cannot get time
-        
-        return timeFunction();
-    }
-
 
 private:
-
-    // Function pointer to write messages/communications
-    static inline WriteFunction writeFunction;
-    static inline TimeFunction timeFunction;
-
     static inline Buffer* m_buffer;
-
 
 
     static bool LogMessage(const Message message) {
@@ -232,7 +246,7 @@ private:
     }
 
     static void print(const char* write) {
-        writeFunction(write, strlen(write));
+        functions::Write(write, strlen(write));
     }
 
     static void print(const Buffer& buffer) {
@@ -241,7 +255,7 @@ private:
         // Copy raw buffer bytes
         buffer.CopyTo(dest, buffer.Length());
 
-        writeFunction(dest, buffer.Length());
+        functions::Write(dest, buffer.Length());
     }
 
     static bool FlushBuffer()
