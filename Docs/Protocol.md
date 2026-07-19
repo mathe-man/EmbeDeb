@@ -5,18 +5,17 @@ The communication protocol is based on a simple message format that consists of 
 - **Communication**: The whole string sent by the sender to the receiver.
 - **Message**: A part of the communication that contains a type and maybe other information. Messages are separated by a separator (e.g., `|`).
 - **Message Type**: The first part of a message, it's separated from the message information by a Key-Value separator (e.g., `=`).
-- **Embedeb Protocol Magic String**: A specific string that identifies the communication as being part of the Embedeb protocol. This is used to ensure that the receiver can recognize and properly handle the communication.
+- **Embedeb Protocol Magic bytes**: Two bytes that identifies the communication as being part of the Embedeb protocol. This is used to ensure that the receiver can recognize and properly handle the communication.
 - **Sender's Identifier**: A unique identifier for the sender of the communication. This is used to identify who sent the communication and can be used for routing or handling purposes.
 
-# Communication Format
-A communication consists of multiple messages, each separated by a separator.
-The first two messages of a communication are reserved for the Embedeb protocol magic string, and the sender's identifier.
+# Header
+The first part of a communication is the header, composed of the magic bytes, directly followed by the length of the communication (represented by an 8 bytes unsigned integer, the `size_t` type in C++), then the sender's identifier ending by a message separator.
 This should look like this:
 ```Embedeb Communication
-MagicNumber|SenderIdentifier|Type=OtherInformation|Type=OtherInformation|...
+MagicNumberLengthSenderIdentifier|Message1|Message2|...
 ```
 
-A communication must start with the Embedeb protocol magic string and can end with a message separator or not.
+A communication must start with the Embedeb protocol magic bytes and can end with a message separator or not.
 
 # Message Format
 A message consists of a message type and optionally other information, separated by a separator.
@@ -44,10 +43,13 @@ The protocol uses specific characters as separators, and these characters should
 - `=`: Used as a key-value separator in messages.
 - `,`: Used as a types and values separator in messages (optional).
 
->!Note that those can be changed by the sender and receiver as long as they agree on the new characters to use.
+>Note that those can be changed by the sender and receiver as long as they agree on the new characters to use.
 
 # Example Communication
 Here are several examples of communications that follow the Embedeb protocol:
+
+> Note that those are directly represented in a readable way, in fact the protocol use raw bytes for numbers and the magic bytes
+
 ```Embedeb Communication
 EBDB|MyArduino|Ping=OutOfMemory|Memory=8978
 ```
