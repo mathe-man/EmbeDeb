@@ -1,4 +1,7 @@
 *
 !.gitignore
 !include
+!include/**
+
 !src
+!src/**

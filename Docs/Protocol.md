@@ -5,6 +5,7 @@ The communication protocol is based on a simple message format that consists of 
 - **Communication**: The whole string sent by the sender to the receiver.
 - **Message**: A part of the communication that contains a type and maybe other information. Messages are separated by a separator (e.g., `|`).
 - **Message Type**: The first part of a message, it's separated from the message information by a Key-Value separator (e.g., `=`).
+- **Message's time information**: It is placed automaticly after the type of the message and provide information about the time this message were raised/created.
 - **Embedeb Protocol Magic bytes**: Two bytes that identifies the communication as being part of the Embedeb protocol. This is used to ensure that the receiver can recognize and properly handle the communication.
 - **Sender's Identifier**: A unique identifier for the sender of the communication. This is used to identify who sent the communication and can be used for routing or handling purposes.
 
@@ -18,19 +19,22 @@ MagicNumberLengthSenderIdentifier|Message1|Message2|...
 A communication must start with the Embedeb protocol magic bytes and can end with a message separator or not.
 
 # Message Format
-A message consists of a message type and optionally other information, separated by a separator.
+A message consists of a message type, a time information and other information, separated by a separator.
+>The way time is represented can be changed as you wich, but for an easy use u can directly use methods like `millis()`on your embedded device
+
 It can look like this:
 ```Embedeb Message
-Type=OtherInformation
+Type,Time=OtherInformation
 ```
 ## Message Types
 But a message's type part can contain multiple types ! That don't necessarily have to be separated by a separator, but can be separated by a different character (e.g., `,`).
+The last element of the Type side of a message will alway be the time information preceded by a comma (`,`)
 ```Embedeb Message
-Type1,Type2,Type3=OtherInformation
+Type1,Type2,Type3,Time=OtherInformation
 ```
 
 ```Embedeb Message
-Type1Type2-Type3=OtherInformation
+Type1Type2-Type3,Time=OtherInformation
 ```
 In both of the above examples, the message has three types: `Type1`, `Type2`, and `Type3`. And they'll be properly interpreted
 
@@ -41,7 +45,7 @@ The information part is all the content following the separator in a message. It
 The protocol uses specific characters as separators, and these characters should not be used in the message types or informations unless they are properly escaped or handled by the sender and receiver. The reserved characters include:
 - `|`: Used as a message separator.
 - `=`: Used as a key-value separator in messages.
-- `,`: Used as a types and values separator in messages (optional).
+- `,`: Used as a separator in messages.
 
 >Note that those can be changed by the sender and receiver as long as they agree on the new characters to use.
 
