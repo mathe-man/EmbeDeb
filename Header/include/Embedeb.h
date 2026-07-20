@@ -171,7 +171,7 @@ public:
         // Type + Content + Type-Content separator and Messages separator
         size_t size =
             strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
-        + sizeof(TimeType) + sizeof(','); // We may also add informations about the timestamp
+        + sizeof(TimeType) + sizeof(','); // We may also add information about the timestamp
 
         m_buffer = new Buffer(size);
 
@@ -238,6 +238,7 @@ private:
         if (message.CopyInto(*m_buffer)) {
             return true;
         }
+
         // Otherwise we flush then try again
 
         FlushBuffer();
@@ -263,22 +264,29 @@ private:
         if (m_buffer->Length() == 0) {
             return false; // Buffer is empty, no need to flush
         }
-        // Send the serial communication with the format: MagicNumber|BoardName|message1|message2|...|messageN (Assuming the separator is '|')
 
-        Buffer header(50);
+        // Create a header with the desired size
+        Buffer header(
+            strlen(EMBEDEB_MAGIC) +
+            sizeof(size_t) +
+            strlen(EMBEDEB_BOARD_NAME) +
+            sizeof(char)
+            );
+
+
         header.Append(EMBEDEB_MAGIC);
         // Length of the communication
         header.Append(
             m_buffer->Length()  // Every messages
             + strlen(EMBEDEB_MAGIC)  // Magic number
-            + sizeof(MessageSeparator)*2    // Two separator
-            + strlen(EMBEDEB_BOARD_NAME)   // Board name
             + sizeof(size_t)                    // The length counter (the one actually calculated)
+            + strlen(EMBEDEB_BOARD_NAME)   // Board name
+            + sizeof(char)  // Message separator between the header and the content
         );
 
-        header.Append(MessageSeparator);
         header.Append(EMBEDEB_BOARD_NAME);
         header.Append(MessageSeparator);
+
 
         print(header);
         print(*m_buffer);
