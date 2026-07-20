@@ -177,10 +177,9 @@ public:
 
         m_buffer->Append(type);
 
-        if (const auto time = functions::GetTime(); time != 0) {
-            m_buffer->Append(',');
-            m_buffer->Append(time);
-        }
+        // Add the time information
+        m_buffer->Append(',');
+        m_buffer->Append(functions::GetTime());
 
         m_buffer->Append(TypeContentSeparator);
         m_buffer->Append(content);
