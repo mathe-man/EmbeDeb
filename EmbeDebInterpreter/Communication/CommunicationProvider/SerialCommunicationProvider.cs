@@ -4,7 +4,7 @@ namespace EmbeDebInterpreter.Communication.CommunicationProvider;
 
 public class SerialCommunicationProvider : ICommunicationProvider
 {
-    public event EventHandler<string>? OnCommunicationReceived;
+    public event EventHandler<ParsedCommunication>? OnCommunicationReceived;
     
 
     private SerialPort _serialPort;
@@ -34,22 +34,22 @@ public class SerialCommunicationProvider : ICommunicationProvider
     {
         _receivedDataBuffer += _serialPort.ReadExisting(); // Read all available data and append to buffer
 
-        if (_receivedDataBuffer.Contains(_serialPort.NewLine)) // Check if the buffer contains a complete message
+        if (_receivedDataBuffer.Contains(_serialPort.NewLine)) // Check if the buffer contains a complete serial message (a communication)
         {
             bool bufferEndsWithNewLine = _receivedDataBuffer.EndsWith(_serialPort.NewLine);
             string[] messages = _receivedDataBuffer.Split(new string[] { _serialPort.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             
             if (!bufferEndsWithNewLine) 
             {
-                _receivedDataBuffer = messages[^1]; // Keep the incomplete message in the buffer
-                Array.Resize(ref messages, messages.Length - 1); // Remove the incomplete message from the array
+                _receivedDataBuffer = messages[^1]; // Keep the incomplete communication in the buffer
+                Array.Resize(ref messages, messages.Length - 1); // Remove the communication message from the array
             }
             else
                 _receivedDataBuffer = string.Empty; // Clear the buffer if it ends with a newline
 
 
             foreach (var message in messages) {
-                OnCommunicationReceived?.Invoke(this, message); // Raise event for each complete message
+                OnCommunicationReceived?.Invoke(this, new ParsedCommunication(message)); // Raise event for each complete communication
             }
         }
     }

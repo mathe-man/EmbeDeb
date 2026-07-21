@@ -9,11 +9,8 @@ public class BasicTimeMessage : Message
         Time = time;
         RaiseObjectCreated();
     }
-}
 
-public class BasicTimeMessageHandler {
-
-    [MessageHandler("TIME")]
+    [MessageHandler("BasicTime", "bt")]
     public static Message Handle(RawMessage me)
     {
         var time = int.Parse(me.Content);

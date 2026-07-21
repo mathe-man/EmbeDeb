@@ -12,12 +12,8 @@ public class StringMessage : Message
 
     public override string ToString()
         => Value;
-}
 
-public class StringMessageHandler
-{
-    [MessageHandler("String", "Str", "Text", "Txt", "Print")]
-
+    [MessageHandler("String", "str")]
     public static Message Handle(RawMessage me)
     {
         Console.WriteLine($"StringMessageHandler: {me.Content}");

@@ -17,7 +17,4 @@
   <Project Path="Desktop/Desktop.csproj" Id="98c0e365-e2bf-4be0-87ec-31717cbcd7bf" />
   <Project Path="EmbeDebInterpreter/EmbeDebInterpreter.csproj" />
   <Project Path="Examples/DebuggingProvider/ExampleDebuggingProvider.csproj" Id="6d493422-93f3-4fb7-af7b-e714f0e5684a" />
-  <Project Path="Header/Header.vcxproj" Id="4710cb7e-2ac6-4a78-a8c6-62554b6e3380">
-    <Build Project="false" />
-  </Project>
 </Solution>

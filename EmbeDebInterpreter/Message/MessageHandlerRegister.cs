@@ -13,6 +13,15 @@ internal class MessageHandlerRegister
         _handlers[messageType].Add(handler);
     }
 
+    public void RemoveHandler(string messageType, MethodInfo handler)
+    {
+        if (_handlers.ContainsKey(messageType))
+            _handlers[messageType].Remove(handler);
+
+        if (_handlers.ContainsKey(messageType) && _handlers[messageType].Count == 0)
+            _handlers.Remove(messageType);
+    }
+
     public int CallHandlers(RawMessage message)
     {
         int returnValue = 0;    // We initialize a return value to 0. This will be incremented for each handler found for the message type.

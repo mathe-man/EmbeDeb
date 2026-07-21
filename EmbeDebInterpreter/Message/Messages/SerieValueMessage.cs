@@ -12,13 +12,11 @@ public class SerieValueMessage : Message
 
         RaiseObjectCreated();
     }
-}
-public class SerieValueMessageHandler
-{
-    [MessageHandler("SerieValue")]
+
+    [MessageHandler("SerieValue", "sv")]
     public static Message Handle(RawMessage me)
     {
-        SerieValueMessage result 
+        SerieValueMessage result
             = new SerieValueMessage(uint.Parse(me.Content.Split(',')[0]), me.Content.Split(',')[1]);
         return result;
     }
