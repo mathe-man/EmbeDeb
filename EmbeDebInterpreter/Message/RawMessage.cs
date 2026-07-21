@@ -4,6 +4,7 @@ namespace EmbeDebInterpreter.Message;
 public class RawMessage
 {
     public readonly string Type;
+    public byte[] Time;
     public readonly string Content;
     public RawMessage(string type, string content)
     {
@@ -16,7 +17,15 @@ public class RawMessage
 
         if (!source.Contains('='))
         {
-            Type = source;
+            // We get the index of the ',' before the time information
+            var timeIndex = source.LastIndexOf(',');
+            // TODO check exeptcion in case the string don't contain a comma
+
+            Type = source.Substring(0, timeIndex);
+            // TODO copy the time bytes
+
+
+
             Content = string.Empty;
             return;
         }
