@@ -55,33 +55,33 @@ Here are several examples of communications that follow the Embedeb protocol:
 > Note that those are directly represented in a readable way, in fact the protocol use raw bytes for numbers and the magic bytes
 
 ```Embedeb Communication
-EBDB44MyArduino|Ping=OutOfMemory|Memory=8978
+EBDB54MyArduino|Ping,0013=OutOfMemory|Memory,0014=8978
 ```
 
 ```Embedeb Communication
-EBDB47SensorNode1|Temperature=25.5|Humidity=60|
+EBDB57SensorNode1|Temperature,0125=25.5|Humidity,0125=60|
 ```
 > Note that the last message ends with a separator, which is allowed by the protocol.
 
 ```Embedeb Communication
-EBDB56ControllerSV|Stick1=0.89x0.65y|Button=A*B*Super*L2
+EBDB66ControllerSV|Stick1,0345=0.89x0.65y|Button,0360=A*B*Super*L2
 ```
->!The stick values are represented as `x` and `y` coordinates, and the button values are separated by `*`.
+> The stick values are represented as `x` and `y` coordinates, and the button values are separated by `*`.
 
 ```Embedeb Communication
-EBDB50DeviceX|Status=OK|Battery=85%|Location=Room1
-```
-
-```Embedeb Communication
-EBDB53DeviceY|Error=SensorFailure|Code=1234|Retry=true
+EBDB60DeviceX|Status,0026=OK|Battery,0026=85%|Location,0027=Room1
 ```
 
 ```Embedeb Communication
-EBDB53DeviceZ|Data={"temperature":22.5,"humidity":55}
+EBDB56DeviceY|Error,2732=SensorFailure,code129,retrying|
+```
+
+```Embedeb Communication
+EBDB61DeviceZ|Ambient,0544={"temperature":22.5,"humidity":55}
 ```
 > In this example, the information part of the last message is a JSON object containing temperature and humidity data.
 
 ```Embedeb Communication
-EBDB48EDevice|Debug,Sensor=Value1,Value2,Value3|
+EBDB57Device|Debug,Sensor,d45h02m30=Value1,Value2,Value3|
 ```
 > In this example, the message has multiple types (`Debug` and `Sensor`) separated by a comma, and the information part contains multiple values also separated by a comma. The message ends with a separator, which is allowed by the protocol.
