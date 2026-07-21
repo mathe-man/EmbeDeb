@@ -18,6 +18,20 @@ public class ByteChain
         _bytes = bytes;
     }
 
+    // [] operator
+    public byte this[int index]
+    {
+        get => _bytes[index];
+        set => _bytes[index] = value;
+    }
+
+    public void Insert(byte value, int index)
+        => _bytes.Insert(index, value);
+
+    public void Append(byte value)
+        => _bytes.Append(value);
+
+
     public byte[] GetBytes()
         => _bytes.ToArray();
 
