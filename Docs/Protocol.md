@@ -47,7 +47,7 @@ The protocol uses specific characters as separators, and these characters should
 - `=`: Used as a key-value separator in messages.
 - `,`: Used as a separator in messages.
 
->Note that those can be changed by the sender and receiver as long as they agree on the new characters to use.
+> Note that those can be changed by the sender and receiver as long as they agree on the new characters to use.
 
 # Example Communication
 Here are several examples of communications that follow the Embedeb protocol:
@@ -55,33 +55,33 @@ Here are several examples of communications that follow the Embedeb protocol:
 > Note that those are directly represented in a readable way, in fact the protocol use raw bytes for numbers and the magic bytes
 
 ```Embedeb Communication
-EBDB|MyArduino|Ping=OutOfMemory|Memory=8978
+EBDB44MyArduino|Ping=OutOfMemory|Memory=8978
 ```
 
 ```Embedeb Communication
-EBDB|SensorNode1|Temperature=25.5|Humidity=60|
+EBDB47SensorNode1|Temperature=25.5|Humidity=60|
 ```
->!Note that the last message ends with a separator, which is allowed by the protocol.
+> Note that the last message ends with a separator, which is allowed by the protocol.
 
 ```Embedeb Communication
-EBDB|ControllerSV|Stick1=0.89x0.65y|Button=A*B*Super*L2
+EBDB56ControllerSV|Stick1=0.89x0.65y|Button=A*B*Super*L2
 ```
 >!The stick values are represented as `x` and `y` coordinates, and the button values are separated by `*`.
 
 ```Embedeb Communication
-EBDB|DeviceX|Status=OK|Battery=85%|Location=Room1
+EBDB50DeviceX|Status=OK|Battery=85%|Location=Room1
 ```
 
 ```Embedeb Communication
-EBDB|DeviceY|Error=SensorFailure|Code=1234|Retry=true
+EBDB53DeviceY|Error=SensorFailure|Code=1234|Retry=true
 ```
 
 ```Embedeb Communication
-EBDB|DeviceZ|Data={"temperature":22.5,"humidity":55}
+EBDB53DeviceZ|Data={"temperature":22.5,"humidity":55}
 ```
->!In this example, the information part of the last message is a JSON object containing temperature and humidity data.
+> In this example, the information part of the last message is a JSON object containing temperature and humidity data.
 
+```Embedeb Communication
+EBDB48EDevice|Debug,Sensor=Value1,Value2,Value3|
 ```
-EBDB|EDevice|Debug,Sensor=Value1,Value2,Value3|
-```
->!In this example, the message has multiple types (`Debug` and `Sensor`) separated by a comma, and the information part contains multiple values also separated by a comma. The message ends with a separator, which is allowed by the protocol.
+> In this example, the message has multiple types (`Debug` and `Sensor`) separated by a comma, and the information part contains multiple values also separated by a comma. The message ends with a separator, which is allowed by the protocol.
