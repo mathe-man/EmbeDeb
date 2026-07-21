@@ -95,7 +95,7 @@ public class ByteChain
         if (index + value.Length > _bytes.Count)
             return false;
 
-        for (int i = 0; i < value.Length; j++)
+        for (int i = 0; i < value.Length; i++)
         {
             if (_bytes[index + i] != value[i])
             {
