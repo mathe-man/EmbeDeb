@@ -10,7 +10,11 @@ namespace EmbeDebInterpreter;
 public class ByteChain : IEnumerable<byte>
 {
     private List<byte> _bytes = new ();
-
+    private Encoding asciiEncoding = Encoding.GetEncoding(
+        "ASCII",
+        EncoderFallback.ExceptionFallback,
+        DecoderFallback.ExceptionFallback
+        );
     
     public ByteChain() {}
     public ByteChain(byte[] bytes)
@@ -39,6 +43,21 @@ public class ByteChain : IEnumerable<byte>
     public IEnumerator<byte> GetEnumerator() => _bytes.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+   
+    private byte[] GetBytesFromAscii(string text)
+    {
+        try
+        {
+            byte[] bytes = asciiEncoding.GetBytes("Héllo");
+            return bytes;
+        }
+        catch(EncoderFallbackException)
+        {
+            Console.WriteLine("The string must be composed by ascii character");
+            return [0];
+        }
+    }
+
     public void Insert(byte value, int index)
         => _bytes.Insert(index, value);
 
@@ -66,7 +85,7 @@ public class ByteChain : IEnumerable<byte>
         => _bytes[index];
 
     public string GetStr(int index, int count)
-        => Encoding.UTF8.GetString(Get(index, count).ToArray());
+        => asciiEncoding.GetString(Get(index, count).ToArray());
 
 
 
@@ -95,9 +114,6 @@ public class ByteChain : IEnumerable<byte>
     public bool Contains(byte value)
         => _bytes.Contains(value);
 
-    public bool Contains(char value)
-        => IndexOf(value) != -1;
-
     public bool Contains(string value)
         => IndexOf(value) != -1;
 
@@ -122,12 +138,8 @@ public class ByteChain : IEnumerable<byte>
 
     public int IndexOf(byte value)
         => _bytes.IndexOf(value);
-
-    public int IndexOf(char value)
-        => IndexOf(value.ToString());
-
     public int IndexOf(string value)
-        => IndexOf(Encoding.UTF8.GetBytes(value));
+        => IndexOf(GetBytesFromAscii(value));
 
     public int IndexOf(byte[] value)
     {
@@ -140,14 +152,12 @@ public class ByteChain : IEnumerable<byte>
         return -1;
     }
 
+
+
     public int LastIndexOf(byte value)
         => _bytes.LastIndexOf(value);
-
-    public int LastIndexOf(char value)
-        => LastIndexOf(value.ToString());
-
     public int LastIndexOf(string value)
-        => LastIndexOf(Encoding.UTF8.GetBytes(value));
+        => LastIndexOf(GetBytesFromAscii(value));
 
     public int LastIndexOf(byte[] value)
     {
@@ -165,10 +175,8 @@ public class ByteChain : IEnumerable<byte>
 
     public bool StartWith(byte value)
         => _bytes[0] == value;
-    public bool StartWith(char value)
-        => StartWith(value.ToString());
     public bool StartWith(string value)
-        => StartWith(Encoding.UTF8.GetBytes(value));
+        => StartWith(GetBytesFromAscii(value));
 
     public bool StartWith(byte[] value)
     {
@@ -182,10 +190,8 @@ public class ByteChain : IEnumerable<byte>
     
     public bool EndWith(byte value)
         => _bytes.Last() == value;
-    public bool EndWith(char value)
-        => EndWith(value.ToString());
     public bool EndWith(string value)
-        => EndWith(Encoding.UTF8.GetBytes(value));
+        => EndWith(GetBytesFromAscii(value));
 
     public bool EndWith(byte[] value)
     {
