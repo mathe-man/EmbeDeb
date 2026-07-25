@@ -1,12 +1,13 @@
 ﻿
 using System.Buffers.Binary;
+using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 
 
 namespace EmbeDebInterpreter;
 
-public class ByteChain
+public class ByteChain : IEnumerable<byte>
 {
     private List<byte> _bytes = new ();
 
@@ -27,6 +28,16 @@ public class ByteChain
         get => _bytes[index];
         set => _bytes[index] = value;
     }
+
+    // [i..j] range operator
+    public ByteChain this[Range range]
+    {
+        get => new(_bytes[range].ToList());
+    }
+
+    // Enumerator 
+    public IEnumerator<byte> GetEnumerator() => _bytes.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public void Insert(byte value, int index)
         => _bytes.Insert(index, value);
@@ -90,6 +101,8 @@ public class ByteChain
     public bool Contains(string value)
         => IndexOf(value) != -1;
 
+    public bool Match(byte value, int index)
+        => _bytes[index] == value;
     public bool Match(byte[] value, int index)
     {
         if (index + value.Length > _bytes.Count)
@@ -150,6 +163,38 @@ public class ByteChain
     }
 
 
+    public bool StartWith(byte value)
+        => _bytes[0] == value;
+    public bool StartWith(char value)
+        => StartWith(value.ToString());
+    public bool StartWith(string value)
+        => StartWith(Encoding.UTF8.GetBytes(value));
+
+    public bool StartWith(byte[] value)
+    {
+        for (int i = 0; i < value.Length; i++)
+            if (!Match(value[i], i))
+                return false;
+
+        return true;
+    }
+
+    
+    public bool EndWith(byte value)
+        => _bytes.Last() == value;
+    public bool EndWith(char value)
+        => EndWith(value.ToString());
+    public bool EndWith(string value)
+        => EndWith(Encoding.UTF8.GetBytes(value));
+
+    public bool EndWith(byte[] value)
+    {
+        for (int i = _bytes.Count - 1; i >= 0; i--)
+            if (!Match(value[i], i))
+                return false;
+
+        return true;
+    }
 
     public ByteChain[] Split(byte[] separator)
     {
