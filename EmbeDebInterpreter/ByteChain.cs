@@ -57,12 +57,38 @@ public class ByteChain : IEnumerable<byte>
             return [0];
         }
     }
+    private string GetAsciiFromBytes(byte[] bytes)
+    {
+        try
+        {
+            return asciiEncoding.GetString(bytes);
+        }
+        catch(DecoderFallbackException)
+        {
+            Console.WriteLine("This byte array contains invalid ASCII characters");
+            return string.Empty;
+        }
+    }
+    
+    public void Insert(byte[] bytes, int index)
+    {
+        for (int i = 0; i < bytes.Length; i++)
+            _bytes.Insert(index + i, bytes[i]);
 
+    }
     public void Insert(byte value, int index)
         => _bytes.Insert(index, value);
 
     public void Append(byte value)
         => _bytes.Append(value);
+    public void Append(string value)
+        => Append(GetBytesFromAscii(value));
+
+    public void Append(byte[] value) {
+        foreach (byte b in value) _bytes.Append(b);
+    }
+    public void Append(ByteChain chain)
+        => Append(chain.ToArray());
 
 
     public byte[] ToArray()
@@ -85,7 +111,7 @@ public class ByteChain : IEnumerable<byte>
         => _bytes[index];
 
     public string GetStr(int index, int count)
-        => asciiEncoding.GetString(Get(index, count).ToArray());
+        => GetAsciiFromBytes(Get(index, count).ToArray());
 
 
 
@@ -202,6 +228,11 @@ public class ByteChain : IEnumerable<byte>
         return true;
     }
 
+
+    public ByteChain[] Split(byte separator)
+        => Split([separator]);
+    public ByteChain[] Split(string separator)
+        => Split(GetBytesFromAscii(separator));
     public ByteChain[] Split(byte[] separator)
     {
         List<ByteChain> elements = new List<ByteChain>();
