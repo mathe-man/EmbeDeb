@@ -1,78 +1,66 @@
 ﻿using System.Text;
+using System.Buffers.Binary;
+
 
 namespace EmbeDebInterpreter.Communication;
+
+// TODO test the constructor and Build method of the class to ensure that they are working well
 
 public class ParsedCommunication
 {
     // First bytes of the communication
-    public readonly byte[] MagicNumber;
+    public readonly ByteChain MagicNumber;
 
     // Name of the board who sent the communication
     public readonly string BoardName;
 
-    public readonly string[] Messages;
+    // Lenght of the original un-parsed communication
+    public readonly UInt64 Length;
 
-    public static string defaultMessageSeparator = "|";
+    public readonly ByteChain[] Messages;
 
-    public ParsedCommunication(string source, string? messageSeparator = null)
+    public static readonly string MessageSeparator = "|";
+
+    public ParsedCommunication(ByteChain source)
     {
         if (source == null) throw new ArgumentNullException("source");
-        if (string.IsNullOrEmpty(messageSeparator)) messageSeparator = defaultMessageSeparator;
 
-        // Split the source by the message separator, the first part will be the magic number, the second part will be the board name and the rest will be the messages
-        var splitedSource = source.Split(messageSeparator, StringSplitOptions.RemoveEmptyEntries);
+        // Split the source by the message separator, the first part will be the header, and the rest will be the messages
+        var splitedSource = source.Split(MessageSeparator);
+        var header = splitedSource[0];
 
-        // If the source is empty, we return an empty communication
-        if (splitedSource.Length == 0) {
-            MagicNumber = new Byte[0];
-            BoardName = "";
-            Messages = new string[0];
-            return;
-        }
+        // TODO handle possible errors (bad formated incoming communication)
 
-        // In case the source only contains the magic number:
-        if (splitedSource.Length == 1) {
-            MagicNumber = Encoding.ASCII.GetBytes(splitedSource[0]);
-            BoardName = "";
-            Messages = new string[0];
-            return;
-        }
+        MagicNumber = header.Get(0, 2);
+        Length = header.GetUInt64(2);
 
-        // In case the source contains the magic number and the board name:
-        if (splitedSource.Length == 2) {
-            MagicNumber = Encoding.ASCII.GetBytes(splitedSource[0]);
-            BoardName = splitedSource[1];
-            Messages = new string[0];
-            return;
-        }
+        int nameLength= header.ToArray().Length - 8 - 2; // -8 for the length and 2 for the magic bytes
+
+        BoardName = header.GetStr(10, nameLength);
 
 
-        // In case the source contains the magic number, the board name and some messages:
-        MagicNumber = Encoding.ASCII.GetBytes(splitedSource[0]);
-        BoardName = splitedSource[1];
-
-        Messages = new string[splitedSource.Length - 2];
-        Array.Copy(splitedSource, 2, Messages, 0, Messages.Length); // Copy the messages from the splited source to the Messages array
+        Messages = new ByteChain[splitedSource.Length - 1];
+        Array.Copy(splitedSource, 1, Messages, 0, Messages.Length); // Copy the messages from the splited source to the Messages array
     }
 
-    public string Build(string? messageSeparator = null)
+    public ByteChain Build()
     {
-        if (string.IsNullOrEmpty(messageSeparator)) messageSeparator = defaultMessageSeparator;
+        ByteChain build = new ByteChain();
 
-        var sb = new StringBuilder();
-        sb.Append(Encoding.ASCII.GetString(MagicNumber));
-        sb.Append(messageSeparator);
-        sb.Append(BoardName);
-        sb.Append(messageSeparator);
+        build.Append(MagicNumber);
 
-        foreach (var message in Messages) {
-            sb.Append(message);
-            sb.Append(messageSeparator);
-        }
+        // We'll insert the size at the end
 
-        return sb.ToString();
+        build.Append(BoardName);
+
+        foreach (var message in Messages)
+            build.Append(message);
+
+        byte[] sizeBytes = new byte[8];
+        BinaryPrimitives.WriteUInt64LittleEndian(sizeBytes, Length);
+
+        build.Insert(sizeBytes, 2);
+
+        return build;
     }
-
-    public override string ToString()
-        => Build();
 }
