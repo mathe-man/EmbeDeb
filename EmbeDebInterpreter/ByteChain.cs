@@ -25,6 +25,10 @@ public class ByteChain : IEnumerable<byte>
     {
         _bytes = bytes;
     }
+    public ByteChain(string ascii)
+    {
+        _bytes = GetBytesFromAscii(ascii).ToList();
+    }
 
     // [] operator
     public byte this[int index]
@@ -48,7 +52,7 @@ public class ByteChain : IEnumerable<byte>
     {
         try
         {
-            byte[] bytes = asciiEncoding.GetBytes("Héllo");
+            byte[] bytes = asciiEncoding.GetBytes(text);
             return bytes;
         }
         catch(EncoderFallbackException)
@@ -79,16 +83,16 @@ public class ByteChain : IEnumerable<byte>
     public void Insert(byte value, int index)
         => _bytes.Insert(index, value);
 
-    public void Append(byte value)
-        => _bytes.Append(value);
-    public void Append(string value)
-        => Append(GetBytesFromAscii(value));
+    public void Add(byte value)
+        => _bytes.Add(value);
+    public void Add(string value)
+        => Add(GetBytesFromAscii(value));
 
-    public void Append(byte[] value) {
-        foreach (byte b in value) _bytes.Append(b);
+    public void Add(byte[] value) {
+        foreach (byte b in value) _bytes.Add(b);
     }
-    public void Append(ByteChain chain)
-        => Append(chain.ToArray());
+    public void Add(ByteChain chain)
+        => Add(chain.ToArray());
 
 
     public byte[] ToArray()
@@ -113,6 +117,8 @@ public class ByteChain : IEnumerable<byte>
     public string GetStr(int index, int count)
         => GetAsciiFromBytes(Get(index, count).ToArray());
 
+    public override string ToString()
+        => GetAsciiFromBytes(_bytes.ToArray());
 
 
     public UInt64 GetUInt64(int index)
@@ -237,7 +243,9 @@ public class ByteChain : IEnumerable<byte>
     {
         List<ByteChain> elements = new List<ByteChain>();
 
-        var chain = new ByteChain();
+        // Init the first chain
+        int chainIndex = 0;
+        elements.Add(new ByteChain());
 
         for (int i=0; i < _bytes.Count;)
         {
@@ -245,19 +253,22 @@ public class ByteChain : IEnumerable<byte>
             {
                 i += separator.Length;
 
-                if (chain.ToArray().Length > 0)
-                { 
-                    elements.Add(chain); 
-                    chain = new ByteChain();
-                }
+                chainIndex++;
+                elements.Add(new ByteChain());
             }
 
             else
             {
-                chain.Append(_bytes[i++]);
+                elements[chainIndex].Add(_bytes[i++]);
             }
 
         }
+
+        // Remove empty chains
+        var empty = elements.Where(x => x.ToArray().Length == 0);
+
+        for (int i = 0; i < empty.Count(); i++)
+            elements.Remove(empty.ElementAt(i));
 
         return elements.ToArray();
     }

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 
 
 namespace EmbeDebInterpreter.Communication;
-
+ 
 // TODO test the constructor and Build method of the class to ensure that they are working well
 
 public class ParsedCommunication
@@ -47,14 +47,14 @@ public class ParsedCommunication
     {
         ByteChain build = new ByteChain();
 
-        build.Append(MagicNumber);
+        build.Add(MagicNumber);
 
         // We'll insert the size at the end
 
-        build.Append(BoardName);
+        build.Add(BoardName);
 
         foreach (var message in Messages)
-            build.Append(message);
+            build.Add(message);
 
         byte[] sizeBytes = new byte[8];
         BinaryPrimitives.WriteUInt64LittleEndian(sizeBytes, Length);
