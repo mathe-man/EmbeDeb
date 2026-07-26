@@ -49,7 +49,7 @@ public class SerialCommunicationProvider : ICommunicationProvider
 
 
             foreach (var message in messages) {
-                OnCommunicationReceived?.Invoke(this, new ParsedCommunication(message)); // Raise event for each complete communication
+                OnCommunicationReceived?.Invoke(this, new ParsedCommunication(new ByteChain(message))); // Raise event for each complete communication
             }
         }
     }

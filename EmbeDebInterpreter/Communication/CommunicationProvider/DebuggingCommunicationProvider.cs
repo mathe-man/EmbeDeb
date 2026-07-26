@@ -16,7 +16,7 @@ public class DebuggingCommunicationProvider : ICommunicationProvider
 
         Thread.Sleep(latencyMs);
 
-        OnCommunicationReceived?.Invoke(this, new ParsedCommunication(message));
+        OnCommunicationReceived?.Invoke(this, new ParsedCommunication(new ByteChain(message)));
     }
     public void SendCommunication(ParsedCommunication communication, int latencyMs = -1)
     {
