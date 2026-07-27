@@ -8,8 +8,9 @@ public class ConsoleCommunicationProvider : ICommunicationProvider
     {
         while (true)
         {
-            string input = Console.ReadLine() ?? string.Empty;
-            OnCommunicationReceived?.Invoke(this, new ParsedCommunication(new ByteChain(input)));
+            ByteChain input = new (Console.ReadLine() ?? string.Empty);
+
+            OnCommunicationReceived?.Invoke(this, new ParsedCommunication(input));
         }
     }
 }

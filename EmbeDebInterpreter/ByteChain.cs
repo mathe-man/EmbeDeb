@@ -10,7 +10,7 @@ namespace EmbeDebInterpreter;
 public class ByteChain : IEnumerable<byte>
 {
     private List<byte> _bytes = new ();
-    private Encoding asciiEncoding = Encoding.GetEncoding(
+    private static Encoding asciiEncoding = Encoding.GetEncoding(
         "ASCII",
         EncoderFallback.ExceptionFallback,
         DecoderFallback.ExceptionFallback
@@ -47,8 +47,17 @@ public class ByteChain : IEnumerable<byte>
     public IEnumerator<byte> GetEnumerator() => _bytes.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-   
-    private byte[] GetBytesFromAscii(string text)
+    // String convertion
+    public override string ToString()
+        => GetAsciiFromBytes(_bytes.ToArray());
+
+    // Byte array convertion
+    public byte[] ToArray()
+        => _bytes.ToArray();
+
+
+
+    private static byte[] GetBytesFromAscii(string text)
     {
         try
         {
@@ -61,7 +70,7 @@ public class ByteChain : IEnumerable<byte>
             return [0];
         }
     }
-    private string GetAsciiFromBytes(byte[] bytes)
+    private static string GetAsciiFromBytes(byte[] bytes)
     {
         try
         {
@@ -73,30 +82,54 @@ public class ByteChain : IEnumerable<byte>
             return string.Empty;
         }
     }
-    
-    public void Insert(byte[] bytes, int index)
+
+    public static byte[] GetBytesFor<T>(T value)
     {
+        return value switch
+        {
+            byte b => [b],
+            sbyte v => [(byte)v],
+
+            short v => BitConverter.GetBytes(v),
+            ushort v => BitConverter.GetBytes(v),
+
+            int v => BitConverter.GetBytes(v),
+            uint v => BitConverter.GetBytes(v),
+
+            long v => BitConverter.GetBytes(v),
+            ulong v => BitConverter.GetBytes(v),
+
+            float v => BitConverter.GetBytes(v),
+            double v => BitConverter.GetBytes(v),
+
+            bool v => BitConverter.GetBytes(v),
+            char v => BitConverter.GetBytes(v),
+
+            byte[] v => v,
+            ByteChain v => v.ToArray(),
+
+            string v => GetBytesFromAscii(v),
+
+            _ => throw new NotSupportedException(
+                $"Type '{typeof(T).Name}' is not supported.")
+        };
+    }
+
+
+
+    public void Insert<T>(T value, int index)
+    {
+        var bytes = GetBytesFor(value);
+
         for (int i = 0; i < bytes.Length; i++)
             _bytes.Insert(index + i, bytes[i]);
 
     }
-    public void Insert(byte value, int index)
-        => _bytes.Insert(index, value);
-
-    public void Add(byte value)
-        => _bytes.Add(value);
-    public void Add(string value)
-        => Add(GetBytesFromAscii(value));
-
-    public void Add(byte[] value) {
-        foreach (byte b in value) _bytes.Add(b);
+    
+    public void Add<T>(T value) {
+        foreach (byte b in GetBytesFor(value)) _bytes.Add(b);
     }
-    public void Add(ByteChain chain)
-        => Add(chain.ToArray());
 
-
-    public byte[] ToArray()
-        => _bytes.ToArray();
 
     public ByteChain Get(int index, int count)
     {
@@ -105,21 +138,16 @@ public class ByteChain : IEnumerable<byte>
 
         ByteChain bytes = new ();
 
-        for (int i = index; i < index + count; i++)
-            bytes[i] = _bytes[i];
+        for (int i = 0; i < count; i++)
+            bytes.Add(_bytes[i + index]);
 
         return bytes;
     }
-
     public byte Get(int index)
         => _bytes[index];
 
     public string GetStr(int index, int count)
         => GetAsciiFromBytes(Get(index, count).ToArray());
-
-    public override string ToString()
-        => GetAsciiFromBytes(_bytes.ToArray());
-
 
     public UInt64 GetUInt64(int index)
         => BinaryPrimitives.ReadUInt64LittleEndian(Get(index, sizeof(UInt64)).ToArray());
@@ -127,7 +155,6 @@ public class ByteChain : IEnumerable<byte>
         => BinaryPrimitives.ReadUInt32LittleEndian(Get(index, sizeof(UInt32)).ToArray());
     public UInt16 GetUInt16(int index)
         => BinaryPrimitives.ReadUInt16LittleEndian(Get(index, sizeof(UInt16)).ToArray());
-
 
     public Int64 GetInt64(int index)
         => BinaryPrimitives.ReadInt64LittleEndian(Get(index, sizeof(Int64)).ToArray());
@@ -137,28 +164,23 @@ public class ByteChain : IEnumerable<byte>
         => BinaryPrimitives.ReadInt16LittleEndian(Get(index, sizeof(Int16)).ToArray());
 
     public float GetFloat(int index)
+        => GetSingle(index);
+    public float GetSingle(int index)
         => BinaryPrimitives.ReadSingleLittleEndian(Get(index, sizeof(float)).ToArray());
     public double GetDouble(int index)
         => BinaryPrimitives.ReadDoubleLittleEndian(Get(index, sizeof(double)).ToArray());
 
 
-
-    public bool Contains(byte value)
-        => _bytes.Contains(value);
-
-    public bool Contains(string value)
-        => IndexOf(value) != -1;
-
-    public bool Match(byte value, int index)
-        => _bytes[index] == value;
-    public bool Match(byte[] value, int index)
+    public bool Match<T>(T value, int index)
     {
-        if (index + value.Length > _bytes.Count)
+        var bytes = GetBytesFor(value);
+
+        if (index + bytes.Length > _bytes.Count)
             return false;
 
-        for (int i = 0; i < value.Length; i++)
+        for (int i = 0; i < bytes.Length; i++)
         {
-            if (_bytes[index + i] != value[i])
+            if (_bytes[index + i] != bytes[i])
             {
                 return false;
             }
@@ -168,14 +190,11 @@ public class ByteChain : IEnumerable<byte>
     }
 
 
-    public int IndexOf(byte value)
-        => _bytes.IndexOf(value);
-    public int IndexOf(string value)
-        => IndexOf(GetBytesFromAscii(value));
-
-    public int IndexOf(byte[] value)
+    public int IndexOf<T>(T value)
     {
-        for (int i = 0; i <= _bytes.Count - value.Length; i++)
+        var bytes = GetBytesFor(value);
+
+        for (int i = 0; i <= _bytes.Count - bytes.Length; i++)
         {
             if (Match(value, i))
                 return i;
@@ -184,18 +203,12 @@ public class ByteChain : IEnumerable<byte>
         return -1;
     }
 
-
-
-    public int LastIndexOf(byte value)
-        => _bytes.LastIndexOf(value);
-    public int LastIndexOf(string value)
-        => LastIndexOf(GetBytesFromAscii(value));
-
-    public int LastIndexOf(byte[] value)
+    public int LastIndexOf<T>(T value)
     {
+        var bytes = GetBytesFor(value);
         int last = -1;
 
-        for (int i = 0; i <= _bytes.Count - value.Length; i++)
+        for (int i = 0; i <= _bytes.Count - bytes.Length; i++)
         {
             if (Match(value, i))
                 last = i;
@@ -205,42 +218,32 @@ public class ByteChain : IEnumerable<byte>
     }
 
 
-    public bool StartWith(byte value)
-        => _bytes[0] == value;
-    public bool StartWith(string value)
-        => StartWith(GetBytesFromAscii(value));
-
-    public bool StartWith(byte[] value)
+    public bool StartWith<T>(T value)
     {
-        for (int i = 0; i < value.Length; i++)
-            if (!Match(value[i], i))
+        var bytes = GetBytesFor(value);
+
+        for (int i = 0; i < bytes.Length; i++)
+            if (!Match(bytes[i], i))
                 return false;
 
         return true;
     }
 
-    
-    public bool EndWith(byte value)
-        => _bytes.Last() == value;
-    public bool EndWith(string value)
-        => EndWith(GetBytesFromAscii(value));
-
-    public bool EndWith(byte[] value)
+    public bool EndWith<T>(T value)
     {
+        var bytes = GetBytesFor(value);
+
         for (int i = _bytes.Count - 1; i >= 0; i--)
-            if (!Match(value[i], i))
+            if (!Match(bytes[i], i))
                 return false;
 
         return true;
     }
 
 
-    public ByteChain[] Split(byte separator)
-        => Split([separator]);
-    public ByteChain[] Split(string separator)
-        => Split(GetBytesFromAscii(separator));
-    public ByteChain[] Split(byte[] separator)
+    public ByteChain[] Split<T>(T separator)
     {
+        var bytesSeparator = GetBytesFor(separator);
         List<ByteChain> elements = new List<ByteChain>();
 
         // Init the first chain
@@ -251,7 +254,7 @@ public class ByteChain : IEnumerable<byte>
         {
             if (Match(separator, i))
             {
-                i += separator.Length;
+                i += bytesSeparator.Length;
 
                 chainIndex++;
                 elements.Add(new ByteChain());
