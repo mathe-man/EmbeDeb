@@ -130,6 +130,12 @@ public class ByteChain : IEnumerable<byte>
         foreach (byte b in GetBytesFor(value)) _bytes.Add(b);
     }
 
+    public void RemoveAt(int index)
+        => _bytes.RemoveAt(index);
+
+    public void RemoveRange(int index, int count)
+        => _bytes.RemoveRange(index, count);
+
 
     public ByteChain Get(int index, int count)
     {
