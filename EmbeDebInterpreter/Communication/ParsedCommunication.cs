@@ -9,17 +9,18 @@ namespace EmbeDebInterpreter.Communication;
 public class ParsedCommunication
 {
     // First bytes of the communication
-    public readonly ByteChain MagicNumber;
+    public readonly ByteChain MagicNumber = new ByteChain(new List<byte>() { 0xEB, 0xDB });
 
     // Name of the board who sent the communication
     public readonly string BoardName;
 
     // Lenght of the original un-parsed communication
-    public readonly UInt64 Length;
+    public readonly  UInt64 Length;
 
     public readonly ByteChain[] Messages;
 
     public static readonly string MessageSeparator = "|";
+
 
     public ParsedCommunication(ByteChain source)
     {
@@ -42,6 +43,21 @@ public class ParsedCommunication
         Messages = new ByteChain[splitedSource.Length - 1];
         Array.Copy(splitedSource, 1, Messages, 0, Messages.Length); // Copy the messages from the splited source to the Messages array
     }
+    public ParsedCommunication(ByteChain[] messages, string boardName)
+    {
+        Messages = messages;
+        BoardName= boardName;
+
+        var length = boardName.Length + MagicNumber.Count;
+        // Add the number of messages for the separators
+        length += messages.Count() + 1;
+        length += sizeof(UInt64);
+
+        foreach (var message in messages)
+            length += message.Count();
+
+        Length = (ulong)length;
+    }
 
     public ByteChain Build()
     {
@@ -49,18 +65,22 @@ public class ParsedCommunication
 
         build.Add(MagicNumber);
 
-        // We'll insert the size at the end
-
-        build.Add(BoardName);
-
-        foreach (var message in Messages)
-            build.Add(message);
-
         byte[] sizeBytes = new byte[8];
         BinaryPrimitives.WriteUInt64LittleEndian(sizeBytes, Length);
 
         build.Insert(sizeBytes, 2);
 
+
+        build.Add(BoardName);
+        build.Add('|');
+
+        foreach (var message in Messages)
+        {
+            build.Add(message);
+            build.Add('|');
+        }
+
+        
         return build;
     }
 }
