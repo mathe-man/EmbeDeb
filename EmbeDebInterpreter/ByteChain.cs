@@ -56,6 +56,7 @@ public class ByteChain : IEnumerable<byte>
         => _bytes.ToArray();
 
 
+    public int Count => _bytes.Count;
 
     private static byte[] GetBytesFromAscii(string text)
     {
@@ -103,11 +104,11 @@ public class ByteChain : IEnumerable<byte>
             double v => BitConverter.GetBytes(v),
 
             bool v => BitConverter.GetBytes(v),
-            char v => BitConverter.GetBytes(v),
 
             byte[] v => v,
             ByteChain v => v.ToArray(),
 
+            char c => GetBytesFromAscii($"{c}"),
             string v => GetBytesFromAscii(v),
 
             _ => throw new NotSupportedException(
