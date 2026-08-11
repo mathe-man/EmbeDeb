@@ -38,13 +38,13 @@ public class ConsoleCommunicationProvider : ICommunicationProvider
                     {
                         // TODO add correct culture to allow '.' instead of ',' in floating point
                         result.Add(float.Parse(numStr));
-                        i = endIndex + 1;
+                        i = endIndex;
                     }
                     // int parsing
                     else if (type == 'i')
                     {
-                        result.Add(int.Parse(numStr));
-                        i = endIndex + 1;
+                        result.Add(Int32.Parse(numStr));
+                        i = endIndex;
                     }
 
                 }
