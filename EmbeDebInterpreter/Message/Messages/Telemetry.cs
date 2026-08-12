@@ -38,39 +38,39 @@ public class Telemetry<T> : Message, ITelemetry
 
     #region TypesHandling
 
-    [MessageHandler("Telemetry", "telem")]
+    [MessageHandler("Telemetry", "telem", "telemfloat", "telemsingle")]
     public static Message Handle(RawMessage me)
     {
         // Float is the default type for telemetry, so we can just return a Telemetry<float> instance here.
-        return new Telemetry<float>(me.Content);
+        return new Telemetry<float>(me.Content.ToString());
     }
 
     [MessageHandler("TelemetryDouble", "telemdouble")]
     public static Message HandleDouble(RawMessage me)
     {
         // Return a Telemetry<double> instance for double telemetry.
-        return new Telemetry<double>(me.Content);
+        return new Telemetry<double>(me.Content.ToString());
     }
 
     [MessageHandler("TelemetryInt16", "telemint16")]
     public static Message HandleInt16(RawMessage me)
     {
         // Return a Telemetry<short> instance for 16-bit integer telemetry.
-        return new Telemetry<short>(me.Content);
+        return new Telemetry<short>(me.Content.ToString());
     }
 
     [MessageHandler("TelemetryInt32", "telemint32")]
     public static Message HandleInt32(RawMessage me)
     {
         // Return a Telemetry<int> instance for 32-bit integer telemetry.
-        return new Telemetry<int>(me.Content);
+        return new Telemetry<int>(me.Content.ToString());
     }
 
     [MessageHandler("TelemetryInt64", "telemint64")]
     public static Message HandleInt64(RawMessage me)
     {
         // Return a Telemetry<long> instance for 64-bit integer telemetry.
-        return new Telemetry<long>(me.Content);
+        return new Telemetry<long>(me.Content.ToString());
     }
 
     #endregion

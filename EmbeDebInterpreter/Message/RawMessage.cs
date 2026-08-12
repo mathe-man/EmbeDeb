@@ -4,35 +4,40 @@ namespace EmbeDebInterpreter.Message;
 public class RawMessage
 {
     public readonly string Type;
-    public byte[] Time;
-    public readonly string Content;
-    public RawMessage(string type, string content)
+    public ulong Time;
+    public readonly ByteChain Content;
+    public RawMessage(string type, ByteChain content)
     {
         Type = type;   
         Content = content;
     }
-    public RawMessage(string source)
+    public RawMessage(ByteChain source)
     {
-        if (string.IsNullOrEmpty(source)) throw new ArgumentNullException("source");
+        if (source == null) throw new ArgumentNullException("source");
 
-        if (!source.Contains('='))
+        ByteChain header = source;
+        // If there is a content separator then we split header and content, otherwise we admit that the source only consist of an header
+        if (source.IndexOf("=") != -1)
         {
-            // We get the index of the ',' before the time information
-            var timeIndex = source.LastIndexOf(',');
-            // TODO check exeptcion in case the string don't contain a comma
-
-            Type = source.Substring(0, timeIndex);
-            // TODO copy the time bytes
-
-
-
-            Content = string.Empty;
-            return;
+            header = source.Split("=")[0];
+            Content = source.Split("=")[1];
         }
-        
-        var splitedSource = source.Split('=');
+        else
+            Content = new(); // Empty content
 
-        Type = splitedSource[0];
-        Content = splitedSource[1];
+        // Index of the time information, last comma in the header
+        var timeIndex = header.LastIndexOf(",");
+
+        
+        Time = timeIndex == -1 ? 0 : header.GetUInt64(timeIndex + 1);
+
+        if (timeIndex == -1)
+            Type = header.ToString();
+        else
+            Type = header.GetStr(0, header.Count - timeIndex);
+
+
+
+        var splitedSource = source.Split('=');
     }
 }

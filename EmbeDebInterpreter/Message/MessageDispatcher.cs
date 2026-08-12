@@ -72,7 +72,7 @@ public class MessageDispatcher
         
         foreach (var message in communication.Messages) // For each message in the communication
         {
-            result += Dispatch(new RawMessage(message.ToString())); // We dispatch the message and get the result
+            result += Dispatch(new RawMessage(message)); // We dispatch the message and get the result
         }
 
         return result;

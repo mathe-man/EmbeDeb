@@ -16,6 +16,7 @@ public class StringMessage : Message
     [MessageHandler("String", "str")]
     public static Message Handle(RawMessage me)
     {
-        return new StringMessage(me.Content);
+        var content = me.Content;
+        return new StringMessage(content.ToString());
     }
 }
