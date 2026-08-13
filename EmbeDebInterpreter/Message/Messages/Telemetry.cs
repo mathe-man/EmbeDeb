@@ -14,26 +14,30 @@ public static class Telemetry
     public static List<ITelemetry> All = new List<ITelemetry>();
     public static ITelemetry? GetTelemetry(string name)
         => All.FirstOrDefault(t => t.Name == name);
-}
 
-public class Telemetry<T> : Message, ITelemetry
-{
-    public string Name { get; }
-    public List<T> Samples { get; }
-    public Type StoreType => typeof(T);
-
-
-    public Telemetry(string name)
+    [MessageHandler("sample", "spl")]
+    public static Message? HandleSample(RawMessage me)
     {
-        Name = name;
-        Samples = new List<T>();
+        var split = me.Content.Split(',');
 
-        Telemetry.All.Add(this);
+        var telemetry = GetTelemetry(split[0].ToString());
+        if (telemetry == null)
+            return null;
 
-        RaiseObjectCreated();
+        Type t = telemetry.StoreType;
+        ByteChain value = split[1];
+
+        return t switch
+        {
+            _ when t == typeof(float)  => new Sample<float>(value.GetFloat(0), telemetry as Telemetry<float>),
+            _ when t == typeof(double) => new Sample<double>(value.GetDouble(0), telemetry as Telemetry<double>),
+            _ when t == typeof(short)  => new Sample<short>(value.GetInt16(0), telemetry as Telemetry<short>),
+            _ when t == typeof(int)    => new Sample<int>(value.GetInt32(0), telemetry as Telemetry<int>),
+            _ when t == typeof(long)   => new Sample<long>(value.GetInt64(0), telemetry as Telemetry<long>),
+            _ => null
+        };
+
     }
-    public void Add(T value)
-        => Samples.Add(value);
 
 
     #region TypesHandling
@@ -74,17 +78,42 @@ public class Telemetry<T> : Message, ITelemetry
     }
 
     #endregion
-
-    
 }
 
-public class Sample<T> : Message
+public class Telemetry<T> : Message, ITelemetry
 {
-    public T Value { get; }
-    public Sample(T value)
+    public string Name { get; }
+    public List<Sample<T>> Samples { get; }
+    public Type StoreType => typeof(T);
+
+
+    public Telemetry(string name)
     {
-        Value = value;
+        Name = name;
+        Samples = new List<Sample<T>>();
+
+        Telemetry.All.Add(this);
+
         RaiseObjectCreated();
     }
+    public void Add(Sample<T> value)
+        => Samples.Add(value);    
+}
+
+public interface ISample 
+{
+}
+public class Sample<T> : Message, ISample
+{
+    public T Value { get; }
+    public Telemetry<T> Telemetry { get; }
+    public Sample(T value, Telemetry<T> telemetry)
+    {
+        Value = value;
+        Telemetry = telemetry;
+        telemetry.Add(this);
+        RaiseObjectCreated();
+    }
+    
 }
 // TODO Add sample handling
