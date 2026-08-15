@@ -2,8 +2,33 @@
 
 public abstract class Message
 {
-    protected void RaiseObjectCreated()
-        => ObjectCreated?.Invoke(this, EventArgs.Empty);
+    private static readonly Dictionary<Type, List<Action<Message>>> _handlers = new ();
 
-    public static event EventHandler ObjectCreated;
+    public static void OnMessage<T>(Action<T> handler) where T : Message
+    {
+        var type = typeof(T);
+
+        if (!_handlers.TryGetValue(type, out var handlers))
+        {
+            handlers = new List<Action<Message>>();
+            _handlers.Add(type, handlers);
+        }
+
+        handlers.Add(msg => handler((T)msg));
+    }
+
+
+
+    protected void RaiseObjectCreated()
+    {
+        var type = GetType();
+
+        if (!_handlers.TryGetValue(type, out var handlers))
+            return;
+
+        foreach (var handler in handlers)
+            handler(this);
+    }
+
+    
 }
