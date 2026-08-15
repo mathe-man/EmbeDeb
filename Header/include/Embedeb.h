@@ -228,6 +228,59 @@ private:
 };
 
 
+
+class MessageBuilder {
+public:
+     MessageBuilder(const char* type) {
+        m_type = new Buffer(strlen(type) + sizeof(TimeType) + sizeof(','));
+        m_type->Append(type);
+        m_type->Append(',');
+
+        m_content = new Buffer(0); // Start with an empty buffer for content
+    }
+
+    MessageBuilder& SetType(const char* content) {
+        m_content = new Buffer(strlen(content) + sizeof(TimeType) + sizeof(','));
+        m_content->Append(content);
+        return *this;
+    }
+
+    MessageBuilder& SetTimestamp(const TimeType timestamp) {
+        m_timestamp = timestamp;
+        return *this;
+    }
+    MessageBuilder& SetTimestampNow() {
+        m_timestamp = functions::GetTime();
+        return *this;
+    }
+
+    template<typename T>
+    MessageBuilder& AddInformation(const T& info) {
+        auto next = new Buffer(m_content->Length() + sizeof(info) + 1); // +1 for the separator
+
+        next->Append(*m_content);
+        next->Append(',');
+        next->Append(info);
+
+        delete m_content;
+        m_content = next;
+
+        return *this;
+    }
+
+    Message Build() const {
+        m_type->Append(m_timestamp);
+        return Message(*m_type, *m_content, false);
+    }
+
+private:
+    Buffer* m_type;
+    TimeType m_timestamp = 0;
+    Buffer* m_content;
+};
+
+
+
 class EmbeDeb {
 public:
 
