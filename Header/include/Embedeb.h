@@ -186,6 +186,34 @@ public:
         m_buffer->Append(MessageSeparator);
     }
 
+    Message(Buffer* message) {
+        m_buffer = message;
+    }
+
+    Message(const Buffer& type, const Buffer& content, bool addTime = true)
+    {
+        // Size of the message:
+        // Type + Content + Type-Content separator and Messages separator
+        size_t size =
+            type.Length() + content.Length() + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
+        + (addTime ? sizeof(TimeType) + sizeof(',') : 0); // We may also add information about the timestamp
+
+        m_buffer = new Buffer(size);
+
+        m_buffer->Append(type);
+
+        if (addTime) {
+            // Add the time information
+            m_buffer->Append(',');
+            m_buffer->Append(functions::GetTime());
+        }
+
+        m_buffer->Append(TypeContentSeparator);
+        m_buffer->Append(content);
+        m_buffer->Append(MessageSeparator);
+    }
+
+
     [[nodiscard]]
     size_t Length() const {
         return m_buffer->Length();
