@@ -47,6 +47,7 @@ EmbeDebInterpreter/
     C# protocol interpreter
     Message dispatching system
     Communication providers
+    Messages types
 
 EmbedebDesktop/
     WPF desktop application (experimental)
@@ -83,7 +84,7 @@ Additional providers can easily be implemented through the communication abstrac
 
 ## Desktop Application
 
-The [app integration](https://github.com/mathe-man/EmbeDeb/tree/DesktopAppIntegration) branch contains the early integration work for the desktop application.
+The [app integration](https://github.com/mathe-man/EmbeDeb/tree/dev/desktop) branch contains the work for the desktop application.
 
 The goal of the desktop application is to provide:
 
