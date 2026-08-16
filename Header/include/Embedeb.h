@@ -238,7 +238,10 @@ public:
         auto next = new Buffer(m_content->Length() + sizeof(info) + 1); // +1 for the separator
 
         next->Append(*m_content);
-        next->Append(',');
+        // Add a comma separator if something was already in the content
+        if (m_content->Length() > 0) {
+            next->Append(',');
+        }
         next->Append(info);
 
         delete m_content;
