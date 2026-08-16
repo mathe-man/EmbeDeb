@@ -165,28 +165,7 @@ private:
 
 class Message {
 public:
-    Message(const char* type, const char* content)
-    {
-        // Size of the message:
-        // Type + Content + Type-Content separator and Messages separator
-        size_t size =
-            strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
-        + sizeof(TimeType) + sizeof(','); // We may also add information about the timestamp
-
-        m_buffer = new Buffer(size);
-
-        m_buffer->Append(type);
-
-        // Add the time information
-        m_buffer->Append(',');
-        m_buffer->Append(functions::GetTime());
-
-        m_buffer->Append(TypeContentSeparator);
-        m_buffer->Append(content);
-        m_buffer->Append(MessageSeparator);
-    }
-
-    Message(Buffer* message) {
+    explicit Message(Buffer* message) {
         m_buffer = message;
     }
 
