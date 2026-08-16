@@ -44,8 +44,8 @@
 #endif
 
 
-constexpr char MessageSeparator =  *"|";           // Separator between messages
-constexpr char TypeContentSeparator = *"=";        // Key-Value separator between the type and the content of a message
+constexpr char MessageSeparator =  '|';           // Separator between messages
+constexpr char TypeContentSeparator = '=';        // Key-Value separator between the type and the content of a message
 
 constexpr size_t MessagesBufferSize = 128;          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
 
@@ -86,7 +86,7 @@ public:
         m_cursor = 0;
     }
     ~Buffer() {
-        delete m_buffer;
+        delete[] m_buffer;
     }
 
     [[nodiscard]]
@@ -210,7 +210,7 @@ private:
 
 class MessageBuilder {
 public:
-     MessageBuilder(const char* type) {
+    explicit MessageBuilder(const char* type) {
         m_type = new Buffer(strlen(type) + sizeof(TimeType) + sizeof(','));
         m_type->Append(type);
         m_type->Append(',');
@@ -247,7 +247,11 @@ public:
         return *this;
     }
 
-    Message Build() const {
+    [[nodiscard]]
+    Message Build(bool buildTimestamp = true) {
+        if (buildTimestamp)
+            m_timestamp = functions::GetTime();
+
         m_type->Append(m_timestamp);
         return Message(*m_type, *m_content, false);
     }
