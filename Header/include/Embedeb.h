@@ -44,8 +44,8 @@
 #endif
 
 
-constexpr char MessageSeparator =  *"|";           // Separator between messages
-constexpr char TypeContentSeparator = *"=";        // Key-Value separator between the type and the content of a message
+constexpr char MessageSeparator =  '|';           // Separator between messages
+constexpr char TypeContentSeparator = '=';        // Key-Value separator between the type and the content of a message
 
 constexpr size_t MessagesBufferSize = 128;          // Size of the buffer to hold the messages before flushing, can be changed depending of the needs
 
@@ -86,7 +86,7 @@ public:
         m_cursor = 0;
     }
     ~Buffer() {
-        delete m_buffer;
+        delete[] m_buffer;
     }
 
     [[nodiscard]]
@@ -165,26 +165,33 @@ private:
 
 class Message {
 public:
-    Message(const char* type, const char* content)
+    explicit Message(Buffer* message) {
+        m_buffer = message;
+    }
+
+    Message(const Buffer& type, const Buffer& content, bool addTime = true)
     {
         // Size of the message:
         // Type + Content + Type-Content separator and Messages separator
         size_t size =
-            strlen(type) + strlen(content) + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
-        + sizeof(TimeType) + sizeof(','); // We may also add information about the timestamp
+            type.Length() + content.Length() + sizeof(TypeContentSeparator) + sizeof(MessageSeparator)
+        + (addTime ? sizeof(TimeType) + sizeof(',') : 0); // We may also add information about the timestamp
 
         m_buffer = new Buffer(size);
 
         m_buffer->Append(type);
 
-        // Add the time information
-        m_buffer->Append(',');
-        m_buffer->Append(functions::GetTime());
+        if (addTime) {
+            // Add the time information
+            m_buffer->Append(',');
+            m_buffer->Append(functions::GetTime());
+        }
 
         m_buffer->Append(TypeContentSeparator);
         m_buffer->Append(content);
         m_buffer->Append(MessageSeparator);
     }
+
 
     [[nodiscard]]
     size_t Length() const {
@@ -198,6 +205,66 @@ public:
 private:
     Buffer* m_buffer;
 };
+
+
+
+class MessageBuilder {
+public:
+    explicit MessageBuilder(const char* type) {
+        m_type = new Buffer(strlen(type) + sizeof(TimeType) + sizeof(','));
+        m_type->Append(type);
+        m_type->Append(',');
+
+        m_content = new Buffer(0); // Start with an empty buffer for content
+    }
+
+    MessageBuilder& SetType(const char* content) {
+        m_content = new Buffer(strlen(content) + sizeof(TimeType) + sizeof(','));
+        m_content->Append(content);
+        return *this;
+    }
+
+    MessageBuilder& SetTimestamp(const TimeType timestamp) {
+        m_timestamp = timestamp;
+        return *this;
+    }
+    MessageBuilder& SetTimestampNow() {
+        m_timestamp = functions::GetTime();
+        return *this;
+    }
+
+    template<typename T>
+    MessageBuilder& AddInformation(const T& info) {
+        auto next = new Buffer(m_content->Length() + sizeof(info) + 1); // +1 for the separator
+
+        next->Append(*m_content);
+        // Add a comma separator if something was already in the content
+        if (m_content->Length() > 0) {
+            next->Append(',');
+        }
+        next->Append(info);
+
+        delete m_content;
+        m_content = next;
+
+        return *this;
+    }
+
+    [[nodiscard]]
+    Message Build(bool buildTimestamp = true) {
+        if (buildTimestamp)
+            m_timestamp = functions::GetTime();
+
+        m_type->Append(m_timestamp);
+        return Message(*m_type, *m_content, false);
+    }
+
+private:
+    Buffer* m_type;
+    TimeType m_timestamp = 0;
+    Buffer* m_content;
+};
+
 
 
 class EmbeDeb {
