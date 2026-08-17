@@ -36,8 +36,5 @@ public class RawMessage
         else
             Type = header.GetStr(0, header.Count - sizeof(UInt32) - 1); // -1 for comma separator
 
-
-        Console.WriteLine($"New RawMessage: Type:{Type}");
-        var splitedSource = source.Split('=');
     }
 }
