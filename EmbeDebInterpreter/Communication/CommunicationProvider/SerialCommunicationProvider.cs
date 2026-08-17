@@ -21,6 +21,7 @@ public class SerialCommunicationProvider : ICommunicationProvider
         try
         {
             _serialPort.Open();
+            Console.WriteLine($"Serial port {port} opened at {baudRate} baud.");
         }
         catch (Exception ex)
         {
@@ -36,6 +37,7 @@ public class SerialCommunicationProvider : ICommunicationProvider
 
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
+        Console.WriteLine($"Data received on serial port: {_serialPort.BytesToRead} bytes left");
         while (_serialPort.BytesToRead > 0)
         {
             int count = _serialPort.Read(_buffer, 0, Math.Min(_buffer.Length, _serialPort.BytesToRead));
@@ -47,7 +49,7 @@ public class SerialCommunicationProvider : ICommunicationProvider
 
             // Check if the chain contain the Embedeb magic bytes
             int magicIndex = _chain.IndexOf(ICommunicationProvider.EmbedebMagicBytes);
-            if (magicIndex > 0)
+            if (magicIndex >= 0)
             {
                 if (currentCommunicationLength > 0)
                 {
