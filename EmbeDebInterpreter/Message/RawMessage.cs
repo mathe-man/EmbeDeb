@@ -8,7 +8,7 @@ public class RawMessage
     public readonly ByteChain Content;
     public RawMessage(string type, ByteChain content)
     {
-        Type = type;   
+        Type = type; 
         Content = content;
     }
     public RawMessage(ByteChain source)
@@ -29,15 +29,15 @@ public class RawMessage
         var timeIndex = header.LastIndexOf(",");
 
         
-        Time = timeIndex == -1 ? 0 : header.GetUInt64(timeIndex + 1);
+        Time = timeIndex == -1 ? 0 : header.GetUInt32(timeIndex + 1);
 
         if (timeIndex == -1)
             Type = header.ToString();
         else
-            Type = header.GetStr(0, header.Count - timeIndex);
+            Type = header.GetStr(0, header.Count - sizeof(UInt32) - 1); // -1 for comma separator
 
 
-
+        Console.WriteLine($"New RawMessage: Type:{Type}");
         var splitedSource = source.Split('=');
     }
 }

@@ -15,7 +15,7 @@ public class ParsedCommunication
     public readonly string BoardName;
 
     // Lenght of the original un-parsed communication
-    public readonly  UInt64 Length;
+    public readonly  UInt32 Length;
 
     public readonly ByteChain[] Messages;
 
@@ -33,7 +33,7 @@ public class ParsedCommunication
         // TODO handle possible errors (bad formated incoming communication)
 
         MagicNumber = header.Get(0, 2);
-        Length = header.GetUInt64(2);
+        Length = header.GetUInt32(2);
 
         int nameLength= header.ToArray().Length - 8 - 2; // -8 for the length and 2 for the magic bytes
 
@@ -56,7 +56,7 @@ public class ParsedCommunication
         foreach (var message in messages)
             length += message.Count();
 
-        Length = (ulong)length;
+        Length = (uint)length;
     }
 
     public ByteChain Build()
@@ -65,8 +65,8 @@ public class ParsedCommunication
 
         build.Add(MagicNumber);
 
-        byte[] sizeBytes = new byte[8];
-        BinaryPrimitives.WriteUInt64LittleEndian(sizeBytes, Length);
+        byte[] sizeBytes = new byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(sizeBytes, Length);
 
         build.Insert(sizeBytes, 2);
 
