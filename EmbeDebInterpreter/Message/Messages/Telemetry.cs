@@ -29,11 +29,11 @@ public static class Telemetry
 
         return t switch
         {
-            _ when t == typeof(float)  => new Sample<float>(value.GetFloat(0), telemetry as Telemetry<float>),
-            _ when t == typeof(double) => new Sample<double>(value.GetDouble(0), telemetry as Telemetry<double>),
-            _ when t == typeof(short)  => new Sample<short>(value.GetInt16(0), telemetry as Telemetry<short>),
-            _ when t == typeof(int)    => new Sample<int>(value.GetInt32(0), telemetry as Telemetry<int>),
-            _ when t == typeof(long)   => new Sample<long>(value.GetInt64(0), telemetry as Telemetry<long>),
+            _ when t == typeof(float)  => new Sample<float>(value.GetFloat(0), telemetry as Telemetry<float>).Publish(),
+            _ when t == typeof(double) => new Sample<double>(value.GetDouble(0), telemetry as Telemetry<double>).Publish(),
+            _ when t == typeof(short)  => new Sample<short>(value.GetInt16(0), telemetry as Telemetry<short>).Publish(),
+            _ when t == typeof(int)    => new Sample<int>(value.GetInt32(0), telemetry as Telemetry<int>).Publish(),
+            _ when t == typeof(long)   => new Sample<long>(value.GetInt64(0), telemetry as Telemetry<long>).Publish(),
             _ => null
         };
 
@@ -46,35 +46,35 @@ public static class Telemetry
     public static Message Handle(RawMessage me)
     {
         // Float is the default type for telemetry, so we can just return a Telemetry<float> instance here.
-        return new Telemetry<float>(me.Content.ToString());
+        return new Telemetry<float>(me.Content.ToString()).Publish();
     }
 
     [MessageHandler("TelemetryDouble", "telemdouble")]
     public static Message HandleDouble(RawMessage me)
     {
         // Return a Telemetry<double> instance for double telemetry.
-        return new Telemetry<double>(me.Content.ToString());
+        return new Telemetry<double>(me.Content.ToString()).Publish();
     }
 
     [MessageHandler("TelemetryInt16", "telemint16")]
     public static Message HandleInt16(RawMessage me)
     {
         // Return a Telemetry<short> instance for 16-bit integer telemetry.
-        return new Telemetry<short>(me.Content.ToString());
+        return new Telemetry<short>(me.Content.ToString()).Publish();
     }
 
     [MessageHandler("TelemetryInt32", "telemint32")]
     public static Message HandleInt32(RawMessage me)
     {
         // Return a Telemetry<int> instance for 32-bit integer telemetry.
-        return new Telemetry<int>(me.Content.ToString());
+        return new Telemetry<int>(me.Content.ToString()).Publish();
     }
 
     [MessageHandler("TelemetryInt64", "telemint64")]
     public static Message HandleInt64(RawMessage me)
     {
         // Return a Telemetry<long> instance for 64-bit integer telemetry.
-        return new Telemetry<long>(me.Content.ToString());
+        return new Telemetry<long>(me.Content.ToString()).Publish();
     }
 
     #endregion
@@ -93,8 +93,6 @@ public class Telemetry<T> : Message, ITelemetry
         Samples = new List<Sample<T>>();
 
         Telemetry.All.Add(this);
-
-        RaiseObjectCreated();
     }
     public void Add(Sample<T> value)
         => Samples.Add(value);    
@@ -112,7 +110,6 @@ public class Sample<T> : Message, ISample
         Value = value;
         Telemetry = telemetry;
         telemetry.Add(this);
-        RaiseObjectCreated();
     }
     
 }

@@ -19,16 +19,18 @@ public abstract class Message
 
 
 
-    protected void RaiseObjectCreated()
+
+
+    public Message Publish()
     {
         var type = GetType();
 
         if (!_handlers.TryGetValue(type, out var handlers))
-            return;
+            return this;
 
         foreach (var handler in handlers)
             handler(this);
-    }
 
-    
+        return this;
+    }
 }

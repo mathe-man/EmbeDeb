@@ -7,7 +7,6 @@ public class StringMessage : Message
     public StringMessage(string value)
     {
         Value = value;
-        RaiseObjectCreated();
     }
 
     public override string ToString()
@@ -17,6 +16,6 @@ public class StringMessage : Message
     public static Message Handle(RawMessage me)
     {
         var content = me.Content;
-        return new StringMessage(content.ToString());
+        return new StringMessage(content.ToString()).Publish();
     }
 }

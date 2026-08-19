@@ -7,7 +7,6 @@ public class BreakPointMessage : Message
     public BreakPointMessage(DateTime receivedTime)
     {
         ReceivedTime = receivedTime;
-        RaiseObjectCreated();
     }
 
 
@@ -15,6 +14,6 @@ public class BreakPointMessage : Message
     public static Message Handle(RawMessage me)
     {
         // You can add a breakpoint here for debugging purposes
-        return new BreakPointMessage(DateTime.Now);
+        return new BreakPointMessage(DateTime.Now).Publish();
     }
 }

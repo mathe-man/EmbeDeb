@@ -20,14 +20,12 @@ public class EventMessage : Message
         ReportTime = reportTime;
 
         _storage.Add(this);
-
-        RaiseObjectCreated();
     }
 
     [MessageHandler("event", "evt")]
     static public Message Handle(RawMessage me)
     {
 
-        return new EventMessage(me.Content.ToString(), (uint)me.Time);
+        return new EventMessage(me.Content.ToString(), (uint)me.Time).Publish();
     }
 }
