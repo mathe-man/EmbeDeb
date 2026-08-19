@@ -4,8 +4,8 @@ namespace Desktop.Models.Messages;
 
 public class EventMessage : Message
 {
-    public readonly string EventName;
-    public readonly uint ReportTime;
+    public string EventName { get; }
+    public uint ReportTime { get; }
 
     static public List<EventMessage> GetEvents()
     {
