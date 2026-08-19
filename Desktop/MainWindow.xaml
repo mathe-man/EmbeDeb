@@ -2,7 +2,11 @@
     x:Class="Desktop.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Desktop"
+    xmlns:local="using:Desktop" 
+    
+    xmlns:dock="https://github.com/Dirkster99/AvalonDock"
+    xmlns:views="clr-namespace:Desktop.Views"
+    
     Title="Embedeb Desktop">
 
     <dock:DockingManager x:Name="DockingManager">
@@ -11,10 +15,6 @@
             <dock:LayoutPanel Orientation="Horizontal">
 
                 <dock:LayoutDocumentPane>
-
-                    <LayoutDocument Title="Time Serie">
-                        <views:TimeSerieView/>
-                    </LayoutDocument>
 
                     <LayoutDocument Title="Events">
                         <views:EventView/>

@@ -10,6 +10,13 @@ namespace Desktop;
 
 public partial class MainWindow : Window
 {
+    private static MessageDispatcher _dispatcher;
+    public void AddProvider(ICommunicationProvider provider)
+        => _dispatcher.SubscribeToProvider(provider);
+
+    public void AddAssemblyHandlers(Assembly assembly)
+        => _dispatcher.RegisterAssemblyHandlers(assembly);
+
     public MainWindow()
     {
         InitializeComponent();
@@ -18,15 +25,11 @@ public partial class MainWindow : Window
         DockingManager.Theme = new ArcDarkTheme();
 
         // Embedeb interpreter setup
-        // Provider
-        DebuggingCommunicationProvider provider = new();
-
         // Dispatcher
-        MessageDispatcher dispatcher = new (false, provider);
+        _dispatcher = new MessageDispatcher(true);
 
         // Register all message handlers in the current assembly
-        dispatcher.RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
+        _dispatcher.RegisterAssemblyHandlers(Assembly.GetExecutingAssembly());
 
-        provider.SendCommunication("XX|Ard|TimeSerieValue=Serie1,65,-7.1");
     }
 }

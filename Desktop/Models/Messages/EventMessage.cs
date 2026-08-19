@@ -24,17 +24,10 @@ public class EventMessage : Message
         RaiseObjectCreated();
     }
 
-    [MessageHandler("EventMessage", "e")]
+    [MessageHandler("event", "evt")]
     static public Message Handle(RawMessage me)
     {
-        var args = me.Content.Split(',');
 
-        EventMessage message = null;
-
-        if (args.Length == 2 )
-            message = new EventMessage(args[0], uint.Parse(args[1]));
-
-        // Return a null value if the message is not valid
-        return message;
+        return new EventMessage(me.Content.ToString(), (uint)me.Time);
     }
 }
