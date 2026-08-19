@@ -33,58 +33,62 @@ public class SerialCommunicationProvider : ICommunicationProvider
     private ByteChain _chain = new();
     private readonly byte[] _buffer = new byte[256];
 
-    private int currentCommunicationLength = 0;
-
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
         Console.WriteLine($"Data received on serial port: {_serialPort.BytesToRead} bytes left");
+        
         while (_serialPort.BytesToRead > 0)
         {
-            int count = _serialPort.Read(_buffer, 0, Math.Min(_buffer.Length, _serialPort.BytesToRead));
+            int count = _serialPort.Read(
+                _buffer,
+                0,
+                Math.Min(_buffer.Length, _serialPort.BytesToRead)
+            );
 
             for (int i = 0; i < count; i++)
                 _chain.Add(_buffer[i]);
 
-
-
-            // Check if the chain contain the Embedeb magic bytes
-            int magicIndex = _chain.IndexOf(ICommunicationProvider.EmbedebMagicBytes);
-            if (magicIndex >= 0)
-            {
-                if (currentCommunicationLength > 0)
-                {
-                    if (_chain.ToArray().Length - magicIndex > currentCommunicationLength)
-                    {
-                        OnCommunicationReceived?.Invoke
-                            (this, new ParsedCommunication(_chain.Get(magicIndex, currentCommunicationLength)));
-                         
-                        _chain.RemoveRange(magicIndex, currentCommunicationLength);
-                        currentCommunicationLength = 0;
-                    }
-                }
-                else
-                {
-                    var length = TryGettingCommunicationLenght(magicIndex);
-                    if (length is not null)
-                        currentCommunicationLength = (int)length;
-                }
-            }
-
-            
+            ProcessChain();
         }
     }
 
-    private uint? TryGettingCommunicationLenght(int magicBytesIndex)
+    private void ProcessChain()
     {
-        var chainSize = _chain.ToArray().Length;
+        while (true)
+        {
+            int magicIndex = _chain.IndexOf(ICommunicationProvider.EmbedebMagicBytes);
 
-        // Count if the communication length as already been received
-        // - MagicBytes (index and 1 more because it's 2 bytes)
-        // - Size of an uint (4 bytes, uint32_t in C++)
-        if (chainSize - magicBytesIndex - 1 - sizeof(uint) < 0)
-            return null;
+            if (magicIndex < 0)
+                return;
 
-        return _chain.GetUInt32(magicBytesIndex + 2);
+            // Remove bytes before the magic bytes
+            if (magicIndex > 0)
+            {
+                _chain.RemoveRange(0, magicIndex);
+                magicIndex = 0;
+            }
+
+            // To small to actually read the communication length
+            if (_chain.ToArray().Length < 2 + sizeof(uint))
+                return;
+
+            uint length = _chain.GetUInt32(2);
+
+            // Incomplete communication
+            if (_chain.ToArray().Length < length)
+                return;
+
+            // Complete communication
+            var communication = _chain.Get(0, (int)length);
+
+            OnCommunicationReceived?.Invoke(
+                this,
+                new ParsedCommunication(communication)
+            );
+
+            // Remove transmited communication
+            _chain.RemoveRange(0, (int)length);
+        }
     }
 }
 

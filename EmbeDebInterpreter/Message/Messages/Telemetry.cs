@@ -93,6 +93,8 @@ public class Telemetry<T> : Message, ITelemetry
         Samples = new List<Sample<T>>();
 
         Telemetry.All.Add(this);
+
+        RaiseObjectCreated();
     }
     public void Add(Sample<T> value)
         => Samples.Add(value);    
@@ -110,6 +112,7 @@ public class Sample<T> : Message, ISample
         Value = value;
         Telemetry = telemetry;
         telemetry.Add(this);
+        RaiseObjectCreated();
     }
     
 }
